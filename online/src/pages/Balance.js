@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './authContext';  // Import useAuth hook
+import { useAuth } from './authContext';  // Use the correct import for the useAuth hook
 
 const Balance = () => {
   const [amount, setAmount] = useState('');
@@ -11,12 +11,10 @@ const Balance = () => {
   const [transactionId, setTransactionId] = useState('');
   const [paymentPending, setPaymentPending] = useState(false); // Track payment status
   const navigate = useNavigate();
-  const { loggedIn, logout } = useAuth();  // Use the auth context to get the logged-in state
+  const { isLoggedIn, logout } = useAuth();  // Use the isLoggedIn state from authContext
 
-  // Function to handle adding balance (triggered when the user clicks the "Add Balance" button)
   const handleAddBalance = async () => {
-    if (!loggedIn) {
-      // Show the popup asking the user to log in if not logged in
+    if (!isLoggedIn) {  // Check login status here
       setShowPopup(true);
       setPopupMessage('You need to be logged in to add balance. Click OK to log in.');
       setPopupType('info');
