@@ -11,8 +11,9 @@ const Balance = () => {
   const [transactionId, setTransactionId] = useState('');
   const [paymentPending, setPaymentPending] = useState(false); // Track payment status
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useAuth();  // Use the isLoggedIn state from authContext
+  const { isLoggedIn, logout } = useAuth();  // Use the correct state from the authContext
 
+  // Function to handle adding balance (triggered when the user clicks the "Add Balance" button)
   const handleAddBalance = async () => {
     if (!isLoggedIn) {  // Check login status here
       setShowPopup(true);
@@ -93,7 +94,7 @@ const Balance = () => {
 
   // Handle "OK" click from the popup to navigate to the login page
   const handlePopupOk = () => {
-    if (!loggedIn) {
+    if (!isLoggedIn) {
       // Redirect to login page if the user is not logged in
       navigate('/login');
     }
