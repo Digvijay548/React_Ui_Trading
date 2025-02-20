@@ -10,7 +10,9 @@ const Balance = () => {
     Cashfree=await load({
       mode:"PRODUCTION"
     })
-  }
+  };
+
+  initialzeSDk();
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
