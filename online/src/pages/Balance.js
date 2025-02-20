@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useNavigate } from 'react-router-dom';
 import { useAuth } from './authContext';  // Use the correct import for the useAuth hook
-
+import{load} from '@cashfreepayments/cashfree-js'
+import axios from 'axios';
 const Balance = () => {
+
+  let Cashfree;
+  let initialzeSDk=async function () {
+    Cashfree=await load({
+      mode:"PRODUCTION"
+    })
+  }
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
@@ -22,11 +30,23 @@ const Balance = () => {
       return;
     }
 
+    let res=await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment")
+if(res.data && res.data.payment_session_id)
+{
+  console.log(res.data)
+}
     if (amount >= 600) {
       // Generate a unique transaction ID if it doesn't exist already
-      if (!transactionId) {
-        setTransactionId(new Date().getTime().toString());
-      }
+      
+        setTransactionId(res.data.payment_session_id); //sesion id
+        let checkOptions={
+          paymnetSessionId:res.data.payment_session_id,
+          redirectTarget:"_modal",
+        }
+        
+      Cashfree.checkout(checkOptions).then((res)=>{
+        console.log(res)
+      })
 
       // Set the payment as pending
       setPaymentPending(true);
