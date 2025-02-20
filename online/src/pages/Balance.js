@@ -8,7 +8,7 @@ const Balance = () => {
   let Cashfree;
   let initialzeSDk=async function () {
     Cashfree=await load({
-      mode:"PRODUCTION"
+      mode:"production"
     })
   };
 
@@ -19,10 +19,19 @@ const Balance = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState('');
   const [transactionId, setTransactionId] = useState('');
+  
   const [paymentPending, setPaymentPending] = useState(false); // Track payment status
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useAuth();  // Use the correct state from the authContext
-
+  const { isLoggedIn, logout,LoggedInEmailId } = useAuth();  // Use the correct state from the authContext
+ const verifyPayment=async ()=>{
+  try {
+    let res =await axios.post("",{
+      orderid:transactionId
+    })
+  } catch (error) {
+    
+  }
+ }
   // Function to handle adding balance (triggered when the user clicks the "Add Balance" button)
   const handleAddBalance = async () => {
     if (!isLoggedIn) {  // Check login status here
@@ -32,22 +41,30 @@ const Balance = () => {
       return;
     }
 
-    let res=await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment")
+    let res = await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment", {
+      params: {
+        amount: amount,
+        email: LoggedInEmailId
+      }
+    });
 if(res.data && res.data.payment_session_id)
 {
   console.log(res.data)
 }
-    if (amount >= 600) {
+    if (amount >= 0) {
       // Generate a unique transaction ID if it doesn't exist already
       
         setTransactionId(res.data.payment_session_id); //sesion id
         let checkOptions={
-          paymnetSessionId:res.data.payment_session_id,
+          paymentSessionId:res.data.payment_session_id,
           redirectTarget:"_modal",
         }
         
       Cashfree.checkout(checkOptions).then((res)=>{
-        console.log(res)
+        console.log("Payment Initialzed")
+        if(res.data && res.data.payment_session_id){
+        verifyPayment(res.data.payment_session_id,)
+        }
       })
 
       // Set the payment as pending
@@ -57,7 +74,7 @@ if(res.data && res.data.payment_session_id)
       setPopupType('info'); // Set the popup type to "info" to indicate pending payment
 
       // Call function to initiate Cashfree payment
-      initiateCashfreePayment(amount);
+      //initiateCashfreePayment(amount);
     } else {
       setShowPopup(true);
       setPopupMessage('Error: Minimum amount is ₹600.');

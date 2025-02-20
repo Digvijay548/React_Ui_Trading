@@ -8,7 +8,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const { login } = useAuth(); // Get the login method from context
+  const { login ,LoggedInEmailId} = useAuth(); // Get the login method from context
   const navigate = useNavigate();
 
   // Check if the user is already logged in when the component mounts
@@ -32,6 +32,7 @@ const Login = () => {
       const sessionId = response.data.sessionId;
       localStorage.setItem('sessionId', sessionId); // Store sessionId in localStorage
       login(sessionId); // Use context's login function to update the state
+      LoggedInEmailId(email);
       setErrorMessage(''); // Clear error message if login is successful
       navigate('/home'); // Redirect to home page after successful login
     } catch (error) {
