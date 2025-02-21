@@ -19,14 +19,18 @@ const Balance = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState('');
   const [transactionId, setTransactionId] = useState('');
+  const [paymentId, setPaymentId] = useState('');
   
   const [paymentPending, setPaymentPending] = useState(false); // Track payment status
   const navigate = useNavigate();
   const { isLoggedIn, logout,LoggedInEmailId } = useAuth();  // Use the correct state from the authContext
  const verifyPayment=async ()=>{
   try {
+    console.log("verifyPayment",transactionId)
+    console.log("paymentId",paymentId)
     let res =await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment",{
-      orderid:transactionId
+      orderId:transactionId,
+      PaymentId:paymentId
     })
     console.log("verify payment = ",res)
   } catch (error) {
@@ -54,8 +58,11 @@ if(res.data && res.data.payment_session_id)
 }
     if (amount >= 0) {
       // Generate a unique transaction ID if it doesn't exist already
-      
-        setTransactionId(res.data.payment_session_id); //sesion id
+      console.log("setTransactionId = ",res.data.order_id)
+        setTransactionId(res.data.order_id); //sesion id
+        setPaymentId(res.data.payment_session_id);
+        console.log(res.data.order_id)
+        console.log(res.data.payment_session_id)
         let checkOptions={
           paymentSessionId:res.data.payment_session_id,
           redirectTarget:"_modal",
@@ -63,8 +70,10 @@ if(res.data && res.data.payment_session_id)
         
       Cashfree.checkout(checkOptions).then((res)=>{
         console.log("Payment Initialzed")
+
+        verifyPayment()
         if(res.data && res.data.payment_session_id){
-        verifyPayment(res.data.payment_session_id,)
+        verifyPayment()
         }
       })
 
