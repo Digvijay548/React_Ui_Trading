@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './authContext';  // Use the correct import for the useAuth hook
+import { useAuth } from './authContext';
 import axios from 'axios';
 import { databases, ID } from '../appwrite';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 
 const Home = () => {
-  const { isLoggedIn, logout } = useAuth();  // Ensure you're using `isLoggedIn` here
+  const { isLoggedIn, logout } = useAuth();
   const [price, setPrice] = useState(null);
   const [countdown, setCountdown] = useState(0);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -15,7 +16,6 @@ const Home = () => {
   const chartContainerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch live Bitcoin price from Binance API
   useEffect(() => {
     const fetchBitcoinPrice = async () => {
       try {
@@ -23,177 +23,54 @@ const Home = () => {
         setPrice(response.data.price);
       } catch (error) {
         console.error('Error fetching Bitcoin price:', error);
-        clearInterval(interval);
       }
     };
-
     const interval = setInterval(fetchBitcoinPrice, 500);
-
-    fetchBitcoinPrice(); // Initial fetch
-
-    return () => clearInterval(interval); // Cleanup on unmount
+    fetchBitcoinPrice();
+    return () => clearInterval(interval);
   }, []);
 
-  // Dynamically load the TradingView script
   useEffect(() => {
     const loadTradingViewScript = () => {
+      if (document.getElementById('tradingview-script')) return;
+      
       const script = document.createElement('script');
+      script.id = 'tradingview-script';
       script.src = 'https://s3.tradingview.com/tv.js';
       script.async = true;
       script.onload = () => {
         if (window.TradingView && chartContainerRef.current) {
           new window.TradingView.widget({
-            width: '95%',
-            height: '450',
+            width: '100%',
+            height: '85%',
             symbol: 'BINANCE:BTCUSDT',
             interval: '1',
-            container_id: chartContainerRef.current.id,
+            container_id: 'tradingview_chart',
             locale: 'en',
             theme: 'dark',
           });
-        } else {
-          console.error('Failed to load TradingView library or container not found');
         }
       };
       document.body.appendChild(script);
     };
-
     loadTradingViewScript();
   }, []);
 
-  // Handle transaction (start trade)
-  const handleTransaction = async (type) => {
-    const emailId = localStorage.getItem('emailId'); // Retrieve user email from localStorage
-    if (!emailId) {
-      console.error('User is not logged in');
-      return;
-    }
-
-    const transaction = {
-      userId: emailId,
-      action: String(type),
-      price: String(price),
-      timestamp: new Date().toISOString(),
-      balance: String(100),
-    };
-
-    try {
-      const response = await databases.createDocument(
-        '67b2ec51001147536f70',
-        '67b2ec8f0037c0139541',
-        ID.unique(),
-        transaction
-      );
-      console.log('Transaction recorded:', response);
-    } catch (error) {
-      console.log('Error creating transaction:', error);
-    }
-  };
-
-  // Countdown timer for the button
-  useEffect(() => {
-    let timer;
-    if (countdown > 0 && isButtonDisabled) {
-      timer = setInterval(() => {
-        setCountdown((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (countdown === 0) {
-      clearInterval(timer);
-      setIsButtonDisabled(false);
-      setCountdown(6);
-      setShowPopup(true); // Show popup when countdown is done
-    }
-
-    return () => clearInterval(timer);
-  }, [countdown, isButtonDisabled]);
-
-  // Show low balance popup
-  const setShowLowBalancePopupok = () => {
-    setShowLowBalancePopup(false);
-    navigate('/balance'); // Redirect to balance page
-  };
-
-  // Start trade function
-  const handleStartTrade = () => {
-    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const balance = transactions.balance || 0;
-    if (balance > 0) {
-      setIsButtonDisabled(true);
-      setCountdown(6);
-      handleTransaction('Start Trade');
-    } else {
-      console.log('Low balance...');
-      setShowLowBalancePopup(true);
-    }
-  };
-
-  // If user is not logged in, show login popup
-  if (!isLoggedIn) {
-    return (
-      <div>
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h2>Please log in!</h2>
-            <p>You need to be logged in to access the dashboard.</p>
-            <button onClick={() => navigate('/login')} className="close-popup-btn">
-              Log in
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      {/* Your existing home screen content */}
-
-      <div className="real-time-price-container d-flex justify-content-center align-items-center">
-        <h4 className="real-time-price">
-          Real-time Bitcoin Price: {price ? `$${price}` : 'Loading...'}
-        </h4>
+    <div className="container-fluid p-0 bg-dark text-white vh-100 d-flex flex-column">
+      <div className="text-center py-2" style={{ backgroundColor: '#1a1a2e', color: '#e94560' }}>
+        <h2 className="fw-bold">AI Trading Dashboard</h2>
+        <p className="lead">Real-time Bitcoin Price: <span className="fw-bold text-warning">{price ? `$${price}` : 'Loading...'}</span></p>
       </div>
-
-      <div className="tradingview-container">
-        <div id="tradingview_chart" ref={chartContainerRef}></div>
+      <div className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-stretch">
+        <div id="tradingview_chart" className="w-100" style={{ height: '85%' }} ref={chartContainerRef}></div>
       </div>
-
-      <div className="button-container d-flex justify-content-center align-items-center" style={{ marginTop: '10px' }}>
-        <button
-          className="btn btn-primary"
-          onClick={handleStartTrade}
-          disabled={isButtonDisabled}
-        >
+      <div className="text-center bg-dark" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+        <button className="btn btn-lg btn-success" onClick={() => setIsButtonDisabled(true)} disabled={isButtonDisabled}>
           {isButtonDisabled ? `Starting in ${countdown}s` : 'Start Trade'}
         </button>
       </div>
-
-      {/* Low Balance Popup */}
-      {showLowBalancePopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h2>Low Balance!</h2>
-            <p>Your balance is too low to start a trade. Please add more funds to your account.</p>
-            <button onClick={() => setShowLowBalancePopupok()} className="close-popup-btn">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Trade Completed Popup */}
-      {isButtonDisabled && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h2>Trade Completed!</h2>
-            <p>Your trade has been successfully completed.</p>
-            <button onClick={() => setShowPopup(false)} className="close-popup-btn">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 

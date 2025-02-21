@@ -2,134 +2,60 @@
   text-align: center;
 }
 
-/* Optionally add to your global styles if you prefer */
-
 .card {
-  background-color: rgba(255, 255, 255, 0.8); /* 0.8 is the opacity, adjust as needed */
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
-/* index.css or global stylesheet */
-
-/* index.css or global stylesheet */
-
-/* Apply background image and blur effect */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   height: 100%;
+  background-color: #111517;
+  color: white;
 }
 
 html, body, #root {
   height: 100%;
 }
 
-
-
-/* Add the background image with blur */
-body::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('./img/bg.jpg'); /* Path to your background image */
-  background-size: cover; /* Ensure the image covers the screen */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent repeating the background */
-  filter: blur(10px); /* Apply 50% blur */
-  z-index: -1; /* Make sure the blur doesn't cover your content */
-}
-
-/* Ensure the content is not affected by the blur */
-body > * {
-  position: relative;
-  z-index: 1; /* Keep all content above the blurred background */
-}
-
-
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-/* Add the following to your main CSS file or style the component directly */
-
 .real-time-price {
-  font-family: 'Arial', sans-serif; /* Elegant font */
-  font-size: 2.5rem; /* Larger text */
-  font-weight: 700; /* Bold font */
-  color: #fff; /* White text color */
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4); /* Soft shadow for contrast */
-  background: linear-gradient(45deg, #ff6b81, #f06595); /* Gradient background */
-  padding: 20px 40px; /* Padding around the text */
-  border-radius: 10px; /* Rounded corners */
-  display: inline-block; /* Make the background fit text content */
-  margin-bottom: 10px; /* Spacing below */
-  margin-top: 10px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+  font-family: 'Arial', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(45deg, #ff6b81, #f06595);
+  padding: 20px 40px;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 10px 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .real-time-price:hover {
-  transform: scale(1.05); /* Slightly enlarge on hover */
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Stronger shadow on hover */
+  transform: scale(1.05);
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
 }
 
 .real-time-price::before {
-  content: "💰"; /* Bitcoin emoji */
-  margin-right: 10px; /* Space between emoji and text */
-  font-size: 2rem; /* Same size as text */
+  content: "💰";
+  margin-right: 10px;
+  font-size: 2rem;
 }
 
 .real-time-price span {
-  color: #f8d210; /* Gold color for the price */
-  font-size: 2rem; /* Larger price text */
-  font-weight: 800; /* Bold price */
+  color: #f8d210;
+  font-size: 2rem;
+  font-weight: 800;
 }
 
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-.button-container {
-  margin-top: 10px; /* Adds a top margin of 10px */
-}
-
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Popup overlay */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -137,7 +63,6 @@ body > * {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Popup content */
 .popup-content {
   background: #fff;
   border-radius: 10px;
@@ -176,215 +101,28 @@ body > * {
   background-color: #d0527a;
 }
 
-/* Animation for fadeIn */
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-/* Animation for slideUp */
 @keyframes slideUp {
-  0% {
-    transform: translateY(50px);
-  }
-  100% {
-    transform: translateY(0);
-  }
+  0% { transform: translateY(50px); }
+  100% { transform: translateY(0); }
 }
 
-/* balance
-/* Basic styling for the container */
-.balance-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-  background-color: #f8f9fa;
-}
-
-/* Centering the content */
-.balance-content {
-  width: 100%;
-  max-width: 600px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-/* Responsive typography */
-h2 {
-  font-size: 2rem;
-  color: #333;
-}
-
-h3 {
-  font-size: 1.25rem;
-  color: #555;
-  margin-top: 10px;
-}
-
-/* Styling for input and buttons */
-.balance-input {
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  width: 100%;
-  max-width: 200px;
-  margin-bottom: 20px;
-}
-
-.suggested-amounts {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.suggested-amount {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-}
-
-.suggested-amount:hover {
-  background-color: #0056b3;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.add-button,
-.withdraw-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-button {
-  background-color: #28a745;
-  color: #fff;
-}
-
-.add-button:hover {
-  background-color: #218838;
-}
-
-.withdraw-button {
-  background-color: #dc3545;
-  color: #fff;
-}
-
-.withdraw-button:hover {
-  background-color: #c82333;
-}
-
-/* Transaction history styles */
-.transaction-history {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f1f1f1;
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.transaction-item {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.transaction-item:last-child {
-  border-bottom: none;
-}
-
-/* Popup styling */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.popup-content {
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
-}
-
-.popup-content.success {
-  background-color: #dff0d8;
-}
-
-.popup-content.error {
-  background-color: #f2dede;
-}
-
-.popup-content h2 {
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.popup-content p {
-  font-size: 1rem;
-  margin-bottom: 15px;
-}
-
-.close-popup-btn {
-  background-color: #f06595;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-}
-
-.close-popup-btn:hover {
-  background-color: #d0527a;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
   .balance-content {
     padding: 15px;
     max-width: 100%;
   }
-
   .balance-input {
     max-width: 100%;
   }
-
   .suggested-amounts {
     flex-direction: column;
     align-items: center;
   }
-
   .button-container {
     flex-direction: column;
     gap: 10px;
@@ -395,20 +133,15 @@ h3 {
   h2 {
     font-size: 1.5rem;
   }
-
   h3 {
     font-size: 1rem;
   }
-
   .suggested-amount {
     padding: 8px 15px;
   }
-
   .add-button,
   .withdraw-button {
     font-size: 0.9rem;
     padding: 8px 16px;
   }
 }
-
-

@@ -1,10 +1,10 @@
-// About.js
 import React from 'react';
 import '../App.css'; // Optional: import styles
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const About = () => {
   return (
-    <div className="container mt-5" style={{  backgroundColor: 'rgba(223, 188, 247, 0.57)',borderRadius:'20px' }}>
+    <div className="container mt-5 p-4 text-white" style={{ backgroundColor: '#111517', borderRadius: '20px' }}>
       <h2 className="text-center mb-4 pt-4">About Us</h2>
       <p className="text-center pb-4">
         Welcome to AI Trading, the platform where you can trade cryptocurrencies with cutting-edge AI technology. 
@@ -14,11 +14,11 @@ const About = () => {
       </p>
       <div className="text-center pb-4">
         <h4>Our Features:</h4>
-        <ul>
-          <li>Real-time market analysis</li>
-          <li>Advanced AI algorithms for smarter trading</li>
-          <li>User-friendly interface</li>
-          <li>24/7 support</li>
+        <ul className="list-unstyled">
+          <li>✔ Real-time market analysis</li>
+          <li>✔ Advanced AI algorithms for smarter trading</li>
+          <li>✔ User-friendly interface</li>
+          <li>✔ 24/7 support</li>
         </ul>
       </div>
     </div>
