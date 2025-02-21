@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   // Logout function that removes sessionId from localStorage and updates the state
   const logout = () => {
     localStorage.removeItem('sessionId');
-    localStorage.setItem('LoggedInEmailId');
+    localStorage.removeItem('LoggedInEmailId');
     setIsLoggedIn(false);
   };
 
