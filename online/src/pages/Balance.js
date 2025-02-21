@@ -25,11 +25,12 @@ const Balance = () => {
   const { isLoggedIn, logout,LoggedInEmailId } = useAuth();  // Use the correct state from the authContext
  const verifyPayment=async ()=>{
   try {
-    let res =await axios.post("",{
+    let res =await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment",{
       orderid:transactionId
     })
+    console.log("verify payment = ",res)
   } catch (error) {
-    
+    console.log(error);
   }
  }
   // Function to handle adding balance (triggered when the user clicks the "Add Balance" button)
