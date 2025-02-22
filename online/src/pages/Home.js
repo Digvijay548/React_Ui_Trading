@@ -38,6 +38,7 @@ const Home = () => {
       else {
         if (response.data.balance > 0) {
           isButtonDisabled(false)
+          setBalance(response.data.balance);
         }
         else {
           isButtonDisabled(true)
