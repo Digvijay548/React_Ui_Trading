@@ -27,7 +27,6 @@ const Balance = () => {
   useEffect(() => {
     if (isLoggedIn) {
       fetchBalance();
-       updateBalanceInDatabase('2');
     }
   }, [isLoggedIn]);
 
