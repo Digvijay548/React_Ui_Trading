@@ -32,8 +32,13 @@ const Home = () => {
 
   useEffect(() => {
     const loadTradingViewScript = () => {
-      if (document.getElementById('tradingview-script')) return;
-      
+      // Remove existing script if it exists
+      const existingScript = document.getElementById('tradingview-script');
+      if (existingScript) {
+        existingScript.remove(); // Remove the old script to force reload
+      }
+  
+      // Create a new script tag
       const script = document.createElement('script');
       script.id = 'tradingview-script';
       script.src = 'https://s3.tradingview.com/tv.js';
@@ -53,8 +58,17 @@ const Home = () => {
       };
       document.body.appendChild(script);
     };
+  
     loadTradingViewScript();
+  
+    return () => {
+      const chartElement = document.getElementById('tradingview_chart');
+      if (chartElement) {
+        chartElement.innerHTML = ''; // Clear previous chart if exists
+      }
+    };
   }, []);
+  
 
   return (
     <div className="container-fluid p-0 bg-dark text-white vh-100 d-flex flex-column">
