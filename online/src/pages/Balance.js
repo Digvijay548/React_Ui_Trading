@@ -27,6 +27,7 @@ const Balance = () => {
   useEffect(() => {
     if (isLoggedIn) {
       fetchBalance();
+       updateBalanceInDatabase('2');
     }
   }, [isLoggedIn]);
 
@@ -34,7 +35,8 @@ const Balance = () => {
     try {
       const email=localStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
-      console.log(response.data)
+      console.log("fetch balance= ");
+      console.log(response.data);
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);
       }
@@ -95,10 +97,11 @@ const Balance = () => {
     }
   
     try {
+     const Email=localStorage.getItem('LoggedInEmailId');
       const response = await axios.post(
         "https://v0-new-project-rl3sqbf45cs.vercel.app/api/update-balance",
         {
-          email: LoggedInEmailId,
+          email: Email,
           amount: parseFloat(amount),
         }
       );

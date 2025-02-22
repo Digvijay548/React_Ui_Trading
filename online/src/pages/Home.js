@@ -15,12 +15,32 @@ const Home = () => {
   const chartContainerRef = useRef(null);
   const navigate = useNavigate();
 
- 
+
   const fetchBalance = async () => {
     try {
-      const email=localStorage.getItem('LoggedInEmailId');
+      const email = localStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
       console.log(response.data)
+
+      console.log(response.data.last_trade_time)
+      if (response.data.last_trade_time) {
+        const lastTradeDate = new Date(response.data.last_trade_time).toISOString().split("T")[0]; // Extract YYYY-MM-DD
+        const todayDate = new Date().toISOString().split("T")[0]; // Extract today's YYYY-MM-DD
+  
+        console.log(`🔍 Last Trade Date: ${lastTradeDate}, Today's Date: ${todayDate}`);
+  
+        if (lastTradeDate === todayDate) {
+          alert("❌ You can only trade once per day. Please try again tomorrow.");
+          setIsButtonDisabled(false); // Re-enable button
+          return;
+        }
+      }
+
+
+
+
+
+
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);
       }
@@ -45,15 +65,6 @@ const Home = () => {
     fetchBalance();
     fetchTradeValue();
   }, []);
-
-  // ✅ Enable button when balance > 0 & tradeValue is true
-  useEffect(() => {
-    if (balance > 0 && tradeValue) {
-      setIsButtonDisabled(false);
-    } else {
-      setIsButtonDisabled(true);
-    }
-  }, [balance, tradeValue]);
 
   // ✅ Fetch Bitcoin price every 500ms
   useEffect(() => {
@@ -103,40 +114,53 @@ const Home = () => {
     return () => {
       const chartElement = document.getElementById('tradingview_chart');
       if (chartElement) {
-        chartElement.innerHTML = ''; 
+        chartElement.innerHTML = '';
       }
     };
   }, []);
 
   // ✅ Start timer on button click and call API after 60 sec
-  const handleStartTrade = () => {
+  const handleStartTrade = async () => {
     setIsButtonDisabled(true);
-    setCountdown(60);
+    setCountdown(60); // Start countdown timer
 
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // ✅ Call trade API after 60 sec
-          axios.post('https://api.example.com/start-trade', { status: 'completed' })
-            .then(() => console.log('Trade completed'))
-            .catch((error) => console.error('Trade API error:', error));
+    try {
+      const Email = localStorage.getItem("LoggedInEmailId");
 
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      if (!Email) {
+        console.error("❌ No logged-in email found.");
+        return;
+      }
+
+      const response = await axios.post(
+        "https://v0-new-project-rl3sqbf45cs.vercel.app/api/start-trade",
+        { email: Email }
+      );
+
+      console.log("✅ Trade started successfully:", response.data);
+      alert("Trade started successfully! Your balance has increased by 4%.");
+
+    } catch (error) {
+      console.error("❌ Error starting trade:", error.response?.data || error.message);
+
+      if (error.response?.status === 403) {
+        alert("Trade allowed only once per day. Please try again tomorrow.");
+      } else {
+        alert("An error occurred while starting the trade. Please try again.");
+      }
+    }
   };
+
+
 
   return (
     <div className="container-fluid p-0 bg-dark text-white vh-100 d-flex flex-column">
       {/* Header Section */}
-      <div 
-        className="text-center py-2 d-flex flex-column align-items-center" 
-        style={{ 
-          backgroundColor: '#1a1a2e', 
-          color: '#e94560', 
+      <div
+        className="text-center py-2 d-flex flex-column align-items-center"
+        style={{
+          backgroundColor: '#1a1a2e',
+          color: '#e94560',
           padding: '10px',
           maxHeight: '20vh', // Limits header height
           overflow: 'hidden' // Prevents text overflow
@@ -157,9 +181,9 @@ const Home = () => {
           </span>
         </p>
       </div>
-  
+
       {/* TradingView Chart Section */}
-      <div 
+      <div
         className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-center"
         style={{
           height: '65vh', // Increase chart height
@@ -168,13 +192,13 @@ const Home = () => {
       >
         <div id="tradingview_chart" className="w-100" style={{ height: '100%' }} ref={chartContainerRef}></div>
       </div>
-  
+
       {/* Button Section */}
-      <div 
-        className="text-center bg-dark" 
+      <div
+        className="text-center bg-dark"
         style={{ paddingTop: '10px', paddingBottom: '10px', height: '15vh' }}
       >
-        <button 
+        <button
           className="btn btn-lg btn-success"
           onClick={handleStartTrade}
           disabled={isButtonDisabled}
@@ -184,8 +208,8 @@ const Home = () => {
       </div>
     </div>
   );
-  
-  
+
+
 };
 
 export default Home;
