@@ -128,24 +128,49 @@ const Home = () => {
 
   return (
     <div className="container-fluid p-0 bg-dark text-white vh-100 d-flex flex-column">
-      <div className="text-center py-2" style={{ backgroundColor: '#1a1a2e', color: '#e94560' }}>
-        <h2 className="fw-bold">AI Trading Dashboard</h2>
-        <p className="lead">
-          Real-time Bitcoin Price: <span className="fw-bold text-warning">
+      {/* Header Section */}
+      <div 
+        className="text-center py-2 d-flex flex-column align-items-center" 
+        style={{ 
+          backgroundColor: '#1a1a2e', 
+          color: '#e94560', 
+          padding: '10px',
+          maxHeight: '20vh', // Limits header height
+          overflow: 'hidden' // Prevents text overflow
+        }}
+      >
+        <h2 className="fw-bold" style={{ fontSize: '1.5rem' }}>AI Trading Dashboard</h2>
+        <p className="lead" style={{ fontSize: '1rem', marginBottom: '5px' }}>
+          Real-time Bitcoin Price: <span className="fw-bold" style={{ color: '#FFA500' }}>
             {price ? `$${price}` : 'Loading...'}
           </span>
         </p>
-        <p className="lead">Balance: <span className="fw-bold text-success">₹{balance}</span></p>
-        <p className="lead">Trade Status: <span className={`fw-bold ${tradeValue ? 'text-success' : 'text-danger'}`}>
-          {tradeValue ? 'Active' : 'Inactive'}
-        </span></p>
+        <p className="lead" style={{ fontSize: '1rem', marginBottom: '5px' }}>
+          Balance: <span className="fw-bold" style={{ color: '#28a745' }}>₹{balance}</span>
+        </p>
+        <p className="lead" style={{ fontSize: '1rem' }}>
+          Trade Status: <span className="fw-bold" style={{ color: '#FFA500' }}>
+            {tradeValue ? 'Active' : 'Inactive'}
+          </span>
+        </p>
       </div>
-
-      <div className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-stretch">
-        <div id="tradingview_chart" className="w-100" style={{ height: '85%' }} ref={chartContainerRef}></div>
+  
+      {/* TradingView Chart Section */}
+      <div 
+        className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-center"
+        style={{
+          height: '65vh', // Increase chart height
+          padding: '10px'
+        }}
+      >
+        <div id="tradingview_chart" className="w-100" style={{ height: '100%' }} ref={chartContainerRef}></div>
       </div>
-
-      <div className="text-center bg-dark" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+  
+      {/* Button Section */}
+      <div 
+        className="text-center bg-dark" 
+        style={{ paddingTop: '10px', paddingBottom: '10px', height: '15vh' }}
+      >
         <button 
           className="btn btn-lg btn-success"
           onClick={handleStartTrade}
@@ -156,6 +181,8 @@ const Home = () => {
       </div>
     </div>
   );
+  
+  
 };
 
 export default Home;

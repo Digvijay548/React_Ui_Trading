@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { redirect, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './authContext';
 import { load } from '@cashfreepayments/cashfree-js';
 import axios from 'axios';
@@ -22,21 +22,52 @@ const Balance = () => {
   const [paymentId, setPaymentId] = useState('');
   const [paymentPending, setPaymentPending] = useState(false);
   const navigate = useNavigate();
-  const { isLoggedIn, logout, LoggedInEmailId } = useAuth();
+  const { isLoggedIn, LoggedInEmailId } = useAuth();
 
+  // ✅ Function to verify payment after checkout
   const verifyPayment = async () => {
+    if (!transactionId) {
+      console.error("❌ Missing Transaction ID");
+      setShowPopup(true);
+      setPopupMessage("Error: Missing Transaction ID.");
+      setPopupType("error");
+      return;
+    }
+  
     try {
-      console.log("verifyPayment", transactionId);
-      console.log("paymentId", paymentId);
-      let res = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment", {
-        orderId: transactionId,
-        PaymentId: paymentId,
+      console.log("🔍 Verifying Payment - Order ID:", transactionId);
+  
+      // ✅ Call the backend API to verify payment
+      const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment", {
+        orderId: transactionId
       });
-      console.log("verify payment = ", res);
+  
+      console.log("✅ Payment Verification Response:", response.data);
+  
+      // ✅ Check if order_status is 'PAID'
+      if (response.data && response.data.order_status === "PAID") {
+        setBalance((prevBalance) => prevBalance + parseFloat(amount));
+        setShowPopup(true);
+        setPopupMessage("✅ Payment Verified Successfully! Your balance is updated.");
+        setPopupType("success");
+        setPaymentPending(false);
+      } else if (response.data && response.data.order_status === "ACTIVE") {
+        setShowPopup(true);
+        setPopupMessage("⚠️ Payment is still in progress. Please try again later.");
+        setPopupType("warning");
+      } else {
+        setShowPopup(true);
+        setPopupMessage("❌ Payment verification failed. Please try again.");
+        setPopupType("error");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("❌ Error verifying payment:", error);
+      setShowPopup(true);
+      setPopupMessage("❌ Error verifying payment. Please contact support.");
+      setPopupType("error");
     }
   };
+  
 
   const handleAddBalance = async () => {
     if (!isLoggedIn) {
@@ -46,14 +77,20 @@ const Balance = () => {
       return;
     }
 
-    let res = await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment", {
-      params: { amount: amount, email: LoggedInEmailId },
-    });
-    if (res.data && res.data.payment_session_id) {
-      console.log(res.data);
+    const enteredAmount = Number(amount);
+    if (enteredAmount < 1 || isNaN(enteredAmount)) {
+      setShowPopup(true);
+      setPopupMessage('Error: Minimum amount is ₹600 and only numbers are allowed.');
+      setPopupType('error');
+      return;
     }
 
-    if (amount >= 0) {
+    let res = await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment", {
+      params: { amount: enteredAmount, email: LoggedInEmailId },
+    });
+
+    if (res.data && res.data.payment_session_id) {
+      console.log("Payment Session Created:", res.data);
       setTransactionId(res.data.order_id);
       setPaymentId(res.data.payment_session_id);
 
@@ -62,19 +99,15 @@ const Balance = () => {
         redirectTarget: "_modal",
       };
 
-      Cashfree.checkout(checkOptions).then((res) => {
+      Cashfree.checkout(checkOptions).then(() => {
         console.log("Payment Initialized");
-        verifyPayment();
+        setTimeout(verifyPayment, 5000); // Automatically verify after 5 sec
       });
 
       setPaymentPending(true);
       setShowPopup(true);
-      setPopupMessage(`Please complete the payment of ₹${amount}.`);
+      setPopupMessage(`Please complete the payment of ₹${enteredAmount}.`);
       setPopupType('info');
-    } else {
-      setShowPopup(true);
-      setPopupMessage('Error: Minimum amount is ₹600.');
-      setPopupType('error');
     }
   };
 
@@ -87,19 +120,36 @@ const Balance = () => {
 
   return (
     <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100 bg-dark text-white">
-      <div className="card bg-secondary text-white p-5 w-50" style={{ borderRadius: '15px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)' }}>
-        <h2 className="text-center">Balance</h2>
-        <h3 className="text-center">Current Balance: ₹{balance.toFixed(2)}</h3>
-        <div className="input-group my-3">
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter Amount"
-            className="form-control bg-dark text-white border-light"
-          />
-          <button onClick={handleAddBalance} className="btn btn-primary">Add Balance</button>
+      <div className="card bg-secondary text-white p-5 w-50" 
+        style={{ borderRadius: '15px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)' }}>
+        
+        <h2 className="text-center mb-3">Balance</h2>
+        <h3 className="text-center mb-4">Current Balance: <span className="text-success">₹{balance.toFixed(2)}</span></h3>
+
+        {/* Input Field & Button */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">Enter Amount</label>
+          <div className="input-group">
+            <input
+              type="text"
+              value={amount}
+              onChange={(e) => /^\d*$/.test(e.target.value) && setAmount(e.target.value)}
+              placeholder="Enter Amount (Min ₹600)"
+              className="form-control bg-dark text-white border-light"
+            />
+            <button onClick={handleAddBalance} className="btn btn-primary px-4">Add Balance</button>
+          </div>
+          <small className="text-warning mt-2 d-block">Minimum ₹600 required</small>
         </div>
+
+        {/* Verify Payment Button (Only if Payment Pending) */}
+        {paymentPending && (
+          <button className="btn btn-warning w-100 my-2" onClick={verifyPayment}>
+            Verify Payment
+          </button>
+        )}
+
+        {/* Popup Alert */}
         {showPopup && (
           <div className="alert text-center mt-3 alert-dismissible fade show" role="alert">
             <strong>{popupType === 'success' ? 'Success!' : popupType === 'error' ? 'Error!' : 'Info'}</strong> {popupMessage}
