@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './authContext';
 import { load } from '@cashfreepayments/cashfree-js';
@@ -8,23 +8,42 @@ import '../App.css';
 
 const Balance = () => {
   let Cashfree;
-  let initialzeSDk = async function () {
+  let initializeSDK = async function () {
     Cashfree = await load({ mode: "production" });
   };
 
-  initialzeSDk();
+  initializeSDK();
   const [amount, setAmount] = useState('');
   const [balance, setBalance] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [paymentId, setPaymentId] = useState('');
   const [paymentPending, setPaymentPending] = useState(false);
   const navigate = useNavigate();
   const { isLoggedIn, LoggedInEmailId } = useAuth();
 
-  // ✅ Function to verify payment after checkout
+  // ✅ Fetch balance from Appwrite on component load
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchBalance();
+    }
+  }, [isLoggedIn]);
+
+  const fetchBalance = async () => {
+    try {
+      const email=localStorage.getItem('LoggedInEmailId');
+      const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
+      console.log(response.data)
+      if (response.data && response.data.balance !== undefined) {
+        setBalance(response.data.balance);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching balance:", error);
+    }
+  };
+
+  // ✅ Verify payment after checkout
   const verifyPayment = async () => {
     if (!transactionId) {
       console.error("❌ Missing Transaction ID");
@@ -33,20 +52,21 @@ const Balance = () => {
       setPopupType("error");
       return;
     }
-  
+
     try {
       console.log("🔍 Verifying Payment - Order ID:", transactionId);
-  
-      // ✅ Call the backend API to verify payment
+
+      // ✅ Call backend API to verify payment
       const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment", {
         orderId: transactionId
       });
-  
+
       console.log("✅ Payment Verification Response:", response.data);
-  
-      // ✅ Check if order_status is 'PAID'
+
+      // ✅ If order_status is 'PAID', update Appwrite balance
       if (response.data && response.data.order_status === "PAID") {
-        setBalance((prevBalance) => prevBalance + parseFloat(amount));
+        await updateBalanceInDatabase(amount);
+        fetchBalance(); // ✅ Refresh balance after update
         setShowPopup(true);
         setPopupMessage("✅ Payment Verified Successfully! Your balance is updated.");
         setPopupType("success");
@@ -65,6 +85,31 @@ const Balance = () => {
       setShowPopup(true);
       setPopupMessage("❌ Error verifying payment. Please contact support.");
       setPopupType("error");
+    }
+  };
+
+  const updateBalanceInDatabase = async (amount) => {
+    if (!LoggedInEmailId) {
+      console.error("❌ Error: LoggedInEmailId is missing!");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        "https://v0-new-project-rl3sqbf45cs.vercel.app/api/update-balance",
+        {
+          email: LoggedInEmailId,
+          amount: parseFloat(amount),
+        }
+      );
+  
+      console.log("✅ Balance updated in database:", response.data);
+      return response.data; // Optional: return response data for further use
+    } catch (error) {
+      console.error(
+        "❌ Error updating balance in Appwrite:",
+        error.response?.data || error.message
+      );
     }
   };
   
@@ -92,7 +137,6 @@ const Balance = () => {
     if (res.data && res.data.payment_session_id) {
       console.log("Payment Session Created:", res.data);
       setTransactionId(res.data.order_id);
-      setPaymentId(res.data.payment_session_id);
 
       let checkOptions = {
         paymentSessionId: res.data.payment_session_id,
@@ -101,7 +145,7 @@ const Balance = () => {
 
       Cashfree.checkout(checkOptions).then(() => {
         console.log("Payment Initialized");
-        setTimeout(verifyPayment, 5000); // Automatically verify after 5 sec
+        setTimeout(verifyPayment, 5000); // Auto verify after 5 sec
       });
 
       setPaymentPending(true);

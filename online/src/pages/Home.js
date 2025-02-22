@@ -15,14 +15,17 @@ const Home = () => {
   const chartContainerRef = useRef(null);
   const navigate = useNavigate();
 
-  // ✅ Fetch balance when component loads
-  const checkBalance = async () => {
+ 
+  const fetchBalance = async () => {
     try {
-      const response = await axios.get('https://api.example.com/get-balance'); // Replace with your API
-      setBalance(response.data.balance);
+      const email=localStorage.getItem('LoggedInEmailId');
+      const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
+      console.log(response.data)
+      if (response.data && response.data.balance !== undefined) {
+        setBalance(response.data.balance);
+      }
     } catch (error) {
-      console.error('Error fetching balance:', error);
-      setBalance(0);
+      console.error("❌ Error fetching balance:", error);
     }
   };
 
@@ -39,7 +42,7 @@ const Home = () => {
 
   // ✅ Check balance and trade value when page loads
   useEffect(() => {
-    checkBalance();
+    fetchBalance();
     fetchTradeValue();
   }, []);
 
