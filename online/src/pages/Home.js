@@ -23,7 +23,7 @@ const Home = () => {
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
       console.log(response.data);
 
-      if (response.data.last_trade_time != "Not Available") {
+      if (response.data.last_trade_time !== "Not Available") {
         const lastTradeDate = new Date(response.data.last_trade_time).toISOString().split("T")[0];
         const todayDate = new Date().toISOString().split("T")[0];
         console.log(`🔍 Last Trade Date: ${lastTradeDate}, Today's Date: ${todayDate}`);
