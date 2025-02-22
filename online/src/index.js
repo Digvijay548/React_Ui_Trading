@@ -38,16 +38,75 @@ const App = () => {
                   <PrivateRouteButton />
                   <AuthButtons />
                   <li className="nav-item dropdown order-lg-last">
-                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                    <Link
+                      to="#"
+                      className="nav-link dropdown-toggle fw-bold bg-dark text-white"
+                      id="dropdownMenuButton"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      style={{
+                        fontSize: '1.1rem',
+                        padding: '10px 15px',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease-in-out'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222244'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1a1a2e'}
+                    >
                       More
-                    </button>
-                    <ul className="dropdown-menu dropdown-menu-end">
-                      <li><Link to="/referral" className="dropdown-item">Referral</Link></li>
-                      <li><Link to="/balance" className="dropdown-item">Balance</Link></li>
-                      <li><Link to="/contactus" className="dropdown-item">Contact Us</Link></li>
-                      <li><Link to="/termsandconditions" className="dropdown-item">Terms & Conditions</Link></li>
+                    </Link>
+                    <ul
+                      className="dropdown-menu dropdown-menu-end bg-dark"
+                      style={{
+                        border: '1px solid #e94560',
+                        borderRadius: '10px'
+                      }}
+                    >                      
+                      <li>
+                        <Link to="/referral" className="dropdown-item text-white"
+                          style={{
+                            fontSize: '1rem',
+                            padding: '10px',
+                            transition: 'all 0.3s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222244'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          Referral
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/contactus" className="dropdown-item text-white"
+                          style={{
+                            fontSize: '1rem',
+                            padding: '10px',
+                            transition: 'all 0.3s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222244'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          Contact Us
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/termsandconditions" className="dropdown-item text-white"
+                          style={{
+                            fontSize: '1rem',
+                            padding: '10px',
+                            transition: 'all 0.3s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#222244'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          Terms & Conditions
+                        </Link>
+                      </li>
                     </ul>
                   </li>
+
+
+
                 </ul>
               </div>
             </div>
@@ -76,8 +135,22 @@ const PrivateRouteButton = () => {
   const { isLoggedIn } = useAuth();
   return isLoggedIn ? (
     <li className="nav-item">
-      <Link to="/balance" className="nav-link text-white fw-bold">Balance</Link>
+      <Link to="/balance" className="nav-link fw-bold text-white btn btn-outline-success px-4 py-2 d-flex align-items-center"
+        style={{
+          borderRadius: '25px',
+          fontSize: '1.1rem',
+          backgroundColor: '#28a745', // Green wallet color
+          border: 'none',
+          transition: 'all 0.3s ease-in-out',
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#218838'}
+        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#28a745'}
+      >
+        <i className="fas fa-wallet me-2"></i> Add Money
+      </Link>
     </li>
+
   ) : null;
 };
 

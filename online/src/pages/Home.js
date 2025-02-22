@@ -2,20 +2,57 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './authContext';
 import axios from 'axios';
-import { databases, ID } from '../appwrite';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 
 const Home = () => {
   const { isLoggedIn, logout } = useAuth();
   const [price, setPrice] = useState(null);
+  const [balance, setBalance] = useState(0);
+  const [tradeValue, setTradeValue] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [showPopup, setShowPopup] = useState(false);
-  const [showLowBalancePopup, setShowLowBalancePopup] = useState(false);
   const chartContainerRef = useRef(null);
   const navigate = useNavigate();
 
+  // ✅ Fetch balance when component loads
+  const checkBalance = async () => {
+    try {
+      const response = await axios.get('https://api.example.com/get-balance'); // Replace with your API
+      setBalance(response.data.balance);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      setBalance(0);
+    }
+  };
+
+  // ✅ Fetch trade value when component loads
+  const fetchTradeValue = async () => {
+    try {
+      const response = await axios.get('https://api.example.com/get-trade-value'); // Replace with your API
+      setTradeValue(response.data.tradeValue);
+    } catch (error) {
+      console.error('Error fetching trade value:', error);
+      setTradeValue(false);
+    }
+  };
+
+  // ✅ Check balance and trade value when page loads
+  useEffect(() => {
+    checkBalance();
+    fetchTradeValue();
+  }, []);
+
+  // ✅ Enable button when balance > 0 & tradeValue is true
+  useEffect(() => {
+    if (balance > 0 && tradeValue) {
+      setIsButtonDisabled(false);
+    } else {
+      setIsButtonDisabled(true);
+    }
+  }, [balance, tradeValue]);
+
+  // ✅ Fetch Bitcoin price every 500ms
   useEffect(() => {
     const fetchBitcoinPrice = async () => {
       try {
@@ -30,15 +67,14 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // ✅ Load TradingView chart script
   useEffect(() => {
     const loadTradingViewScript = () => {
-      // Remove existing script if it exists
       const existingScript = document.getElementById('tradingview-script');
       if (existingScript) {
-        existingScript.remove(); // Remove the old script to force reload
+        existingScript.remove();
       }
-  
-      // Create a new script tag
+
       const script = document.createElement('script');
       script.id = 'tradingview-script';
       script.src = 'https://s3.tradingview.com/tv.js';
@@ -58,30 +94,64 @@ const Home = () => {
       };
       document.body.appendChild(script);
     };
-  
+
     loadTradingViewScript();
-  
+
     return () => {
       const chartElement = document.getElementById('tradingview_chart');
       if (chartElement) {
-        chartElement.innerHTML = ''; // Clear previous chart if exists
+        chartElement.innerHTML = ''; 
       }
     };
   }, []);
-  
+
+  // ✅ Start timer on button click and call API after 60 sec
+  const handleStartTrade = () => {
+    setIsButtonDisabled(true);
+    setCountdown(60);
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // ✅ Call trade API after 60 sec
+          axios.post('https://api.example.com/start-trade', { status: 'completed' })
+            .then(() => console.log('Trade completed'))
+            .catch((error) => console.error('Trade API error:', error));
+
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   return (
     <div className="container-fluid p-0 bg-dark text-white vh-100 d-flex flex-column">
       <div className="text-center py-2" style={{ backgroundColor: '#1a1a2e', color: '#e94560' }}>
         <h2 className="fw-bold">AI Trading Dashboard</h2>
-        <p className="lead">Real-time Bitcoin Price: <span className="fw-bold text-warning">{price ? `$${price}` : 'Loading...'}</span></p>
+        <p className="lead">
+          Real-time Bitcoin Price: <span className="fw-bold text-warning">
+            {price ? `$${price}` : 'Loading...'}
+          </span>
+        </p>
+        <p className="lead">Balance: <span className="fw-bold text-success">₹{balance}</span></p>
+        <p className="lead">Trade Status: <span className={`fw-bold ${tradeValue ? 'text-success' : 'text-danger'}`}>
+          {tradeValue ? 'Active' : 'Inactive'}
+        </span></p>
       </div>
+
       <div className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-stretch">
         <div id="tradingview_chart" className="w-100" style={{ height: '85%' }} ref={chartContainerRef}></div>
       </div>
+
       <div className="text-center bg-dark" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
-        <button className="btn btn-lg btn-success" onClick={() => setIsButtonDisabled(true)} disabled={isButtonDisabled}>
-          {isButtonDisabled ? `Starting in ${countdown}s` : 'Start Trade'}
+        <button 
+          className="btn btn-lg btn-success"
+          onClick={handleStartTrade}
+          disabled={isButtonDisabled}
+        >
+          {countdown > 0 ? `Starting in ${countdown}s` : 'Start Trade'}
         </button>
       </div>
     </div>

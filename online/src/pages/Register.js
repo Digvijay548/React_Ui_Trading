@@ -42,7 +42,6 @@ const Register = () => {
         setErrorMessage('Please enter your email address.');
         return;
       }
-      const redirectUrl = 'https://tradingapp4.netlify.app/ResetPassword';
       // Send recovery email (password reset with OTP) via Appwrite
       //const promise = await account.createRecovery(resetEmail, redirectUrl); // No redirect URL needed
 
