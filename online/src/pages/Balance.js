@@ -5,6 +5,8 @@ import { load } from '@cashfreepayments/cashfree-js';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
+import { FaPlusCircle, FaWallet, FaMinusCircle, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+
 
 const Balance = () => {
   let Cashfree;
@@ -31,8 +33,14 @@ const Balance = () => {
   const [accountNumber, setAccountNumber] = useState('');
   const [ifscCode, setIfscCode] = useState('');
   const [isAccountAdded, setIsAccountAdded] = useState(false);
+    useEffect(()=>{
+  if(!isLoggedIn)
+  {
+    navigate("/login");
+  }
+    },[isLoggedIn])
 
-  const handleAddAccount = async() => {
+  const handleAddAccount = async () => {
     if (!LoggedInEmailId) {
       console.error("❌ Error: LoggedInEmailId is missing!");
       navigate('/login');
@@ -40,24 +48,24 @@ const Balance = () => {
     }
     if (holderName && accountNumber && ifscCode) {
       setIsAccountAdded(true);
-      try {     
+      try {
         const Email = localStorage.getItem('LoggedInEmailId');
-      const response = await axios.post(
-        "https://v0-new-project-rl3sqbf45cs.vercel.app/api/Add-Account",
-        {
-          email: Email,
-          accountnumber: accountNumber,
-          accountholdername:holderName,
-          ifsccode:ifscCode
-        }
-      );
+        const response = await axios.post(
+          "https://v0-new-project-rl3sqbf45cs.vercel.app/api/Add-Account",
+          {
+            email: Email,
+            accountnumber: accountNumber,
+            accountholdername: holderName,
+            ifsccode: ifscCode
+          }
+        );
 
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      setShowPopup(true);
-      setPopupMessage('Error');
-    }
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        setShowPopup(true);
+        setPopupMessage('Error');
+      }
 
 
     } else {
@@ -70,6 +78,7 @@ const Balance = () => {
   useEffect(() => {
     if (isLoggedIn) {
       fetchBalance();
+      GetAccountDetails();
     }
   }, [isLoggedIn]);
 
@@ -77,8 +86,7 @@ const Balance = () => {
     try {
       const email = localStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
-      console.log("fetch balance= ");
-      console.log(response.data);
+      
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);
       }
@@ -89,11 +97,33 @@ const Balance = () => {
 
   const handleWithdrawMoney = async () => {
     try {
-      console.log("Withdrawal")
+      console.log("Withdrawal done")
     } catch (error) {
       console.error("❌ Error fetching balance:", error);
     }
   };
+
+  const GetAccountDetails = async () => {
+
+    try {
+      const email = localStorage.getItem('LoggedInEmailId');
+      const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-AccountDetails?email=${email}`)
+      
+      if (
+        response.data.accountnumber !== 'Not Available' &&
+        response.data.accountholdername !== 'Not Available' &&
+        response.data.ifsccode !== 'Not Available'
+      ) 
+      {
+        setIsAccountAdded(true);
+        setAccountNumber(response.data.accountnumber);
+        setHolderName( response.data.accountholdername );
+        setIfscCode(response.data.ifsccode);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   // ✅ Verify payment after checkout
   const verifyPayment = async () => {
@@ -106,15 +136,10 @@ const Balance = () => {
     }
 
     try {
-      console.log("🔍 Verifying Payment - Order ID:", transactionId);
-
       // ✅ Call backend API to verify payment
       const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/VerifyPayment", {
         orderId: transactionId
       });
-
-      console.log("✅ Payment Verification Response:", response.data);
-
       // ✅ If order_status is 'PAID', update Appwrite balance
       if (response.data && response.data.order_status === "PAID") {
         await updateBalanceInDatabase(amount);
@@ -155,8 +180,6 @@ const Balance = () => {
           amount: parseFloat(amount),
         }
       );
-
-      console.log("✅ Balance updated in database:", response.data);
       // verifyPayment();
       return response.data; // Optional: return response data for further use
     } catch (error) {
@@ -189,7 +212,6 @@ const Balance = () => {
     });
 
     if (res.data && res.data.payment_session_id) {
-      console.log("Payment Session Created:", res.data);
       setTransactionId(res.data.order_id);
 
       let checkOptions = {
@@ -201,21 +223,12 @@ const Balance = () => {
         if (result.error) {
           // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
           console.log("User has closed the popup or there is some payment error, Check for Payment Status");
-          console.log(result.error);
           setShowPopup(true);
           setPopupMessage("❌ Error verifying payment. Please contact support.");
           setPopupType("error");
         }
-        if (result.redirect) {
-          // This will be true when the payment redirection page couldnt be opened in the same window
-          // This is an exceptional case only when the page is opened inside an inAppBrowser
-          // In this case the customer will be redirected to return url once payment is completed
-          console.log("Payment will be redirected");
-        }
         if (result.paymentDetails) {
           // This will be called whenever the payment is completed irrespective of transaction status
-          console.log("Payment has been completed, Check for Payment Status");
-          console.log(result.paymentDetails.paymentMessage);
           await updateBalanceInDatabase(amount);
           fetchBalance(); // ✅ Refresh balance after update
           setShowPopup(true);
@@ -240,17 +253,30 @@ const Balance = () => {
   };
 
   return (
-    <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100 bg-dark text-white">
-      <div className="card bg-secondary text-white p-4 w-100"
-        style={{ maxWidth: '500px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)' }}>
-
-        <h2 className="text-center mb-3">Balance</h2>
+    <div className="d-flex justify-content-center align-items-center vh-100">
+      <div
+        className="card p-4 shadow-lg text-white"
+        style={{
+          maxWidth: "500px",
+          width: "100%",
+          borderRadius: "15px",
+          backgroundColor: "#1a1a2e",
+          boxShadow: "0px 4px 10px rgba(255, 255, 255, 0.1)",
+        }}
+      >
+        <h2 className="text-center mb-3 text-warning">
+          <FaWallet className="me-2" /> Balance
+        </h2>
         <h3 className="text-center mb-4">Current Balance: <span className="text-success">₹{balance.toFixed(2)}</span></h3>
 
         {/* Tabs */}
-        <div className="d-flex justify-content-center mb-4 flex-wrap">
-          <button className={`btn ${tab === 'add' ? 'btn-primary' : 'btn-outline-light'} mx-2 mb-2`} onClick={() => setTab('add')}>Add Balance</button>
-          <button className={`btn ${tab === 'withdraw' ? 'btn-danger' : 'btn-outline-light'} mx-2 mb-2`} onClick={() => setTab('withdraw')}>Withdraw Money</button>
+        <div className="d-flex justify-content-center mb-4">
+          <button className={`btn ${tab === 'add' ? 'btn-primary' : 'btn-outline-light'} mx-2`} onClick={() => setTab('add')}>
+            <FaPlusCircle className="me-2" /> Add Balance
+          </button>
+          <button className={`btn ${tab === 'withdraw' ? 'btn-danger' : 'btn-outline-light'} mx-2`} onClick={() => setTab('withdraw')}>
+            <FaMinusCircle className="me-2" /> Withdraw Money
+          </button>
         </div>
 
         {tab === 'add' && (
@@ -266,17 +292,15 @@ const Balance = () => {
                 style={{ maxWidth: "300px", marginRight: "10px", flex: "1" }}
               />
               <button onClick={handleAddBalance} className="btn btn-primary px-4 mt-2 mt-md-0">
-                Add Balance
+                <FaPlusCircle className="me-2" /> Add Balance
               </button>
             </div>
-
             <small className="text-warning mt-2 d-block">Minimum ₹600 required</small>
           </div>
         )}
 
         {tab === 'withdraw' && (
           <div className="text-center">
-            {/* Check if account is already added */}
             {!isAccountAdded ? (
               <>
                 <h5 className="mb-3">Add Bank Account</h5>
@@ -289,7 +313,9 @@ const Balance = () => {
                 <label className="form-label fw-bold">IFSC Code</label>
                 <input type="text" className="form-control bg-dark text-white border-light mb-2" value={ifscCode} onChange={(e) => setIfscCode(e.target.value)} placeholder="Enter IFSC Code" />
 
-                <button className="btn btn-success w-100 mb-3" onClick={handleAddAccount}>Save Account</button>
+                <button className="btn btn-success w-100 mb-3" onClick={handleAddAccount}>
+                  <FaCheckCircle className="me-2" /> Save Account
+                </button>
               </>
             ) : (
               <>
@@ -299,17 +325,18 @@ const Balance = () => {
                 <label className="form-label fw-bold">Enter Withdrawal Amount</label>
                 <input type="text" className="form-control bg-dark text-white border-light mb-2" value={withdrawAmount} onChange={(e) => /^\d*$/.test(e.target.value) && setWithdrawAmount(e.target.value)} placeholder="Min ₹300" />
 
-                <button onClick={handleWithdrawMoney} className="btn btn-danger w-100">Withdraw Money</button>
+                <button onClick={handleWithdrawMoney} className="btn btn-danger w-100">
+                  <FaMinusCircle className="me-2" /> Withdraw Money
+                </button>
               </>
             )}
           </div>
         )}
 
-
         {/* Popup Alert */}
         {showPopup && (
-          <div className="alert text-center mt-3 alert-dismissible fade show" role="alert">
-            <strong>{popupType === 'success' ? 'Success!' : popupType === 'error' ? 'Error!' : 'Info'}</strong> {popupMessage}
+          <div className={`alert text-center mt-3 alert-${popupType === 'success' ? 'success' : 'danger'} alert-dismissible fade show`} role="alert">
+            <strong>{popupType === 'success' ? <FaCheckCircle /> : <FaTimesCircle />} {popupType === 'success' ? 'Success!' : 'Error!'}</strong> {popupMessage}
             <button type="button" className="btn-close" onClick={handlePopupOk}></button>
           </div>
         )}

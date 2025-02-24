@@ -5,6 +5,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 import { Modal, Button } from "react-bootstrap";
+import { FaEnvelope, FaWallet, FaBitcoin, FaChartLine, FaLock, FaSignInAlt } from "react-icons/fa";
 
 const Home = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -15,6 +16,17 @@ const Home = () => {
   const chartContainerRef = useRef(null);
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalHeader, setModalHeader] = useState("");
+
+  const [modalStyle, setModalStyle] = useState(""); // For dynamic styles
+
+  useEffect(()=>{
+if(!isLoggedIn)
+{
+  navigate("/login");
+}
+  },[isLoggedIn])
 
   // Fetch user balance
   const fetchBalance = async () => {
@@ -35,6 +47,7 @@ const Home = () => {
         console.log(`🔍 Last Trade Date: ${lastTradeDate}, Today's Date: ${todayDate}`);
 
         if (lastTradeDate === todayDate) {
+
           setIsButtonDisabled(true);
         } else {
           setIsButtonDisabled(false);
@@ -109,7 +122,11 @@ const Home = () => {
 
   // Handle disabled button click
   const btnDisableClick = () => {
+    setModalHeader("⚠️ Trade Not Allowed")
+    setModalMessage("Today's trade is already done or balance is too low.")
+    setModalStyle("bg-dark text-white")
     setShowPopup(true);
+
   };
 
   // Start trade
@@ -132,27 +149,89 @@ const Home = () => {
     }
   };
 
+  // ✅ Countdown Effect (Runs Only When Trade Starts)
+  useEffect(() => {
+    if (!isButtonDisabled || countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+
+          // ✅ Show trade success popup only when countdown reaches 0
+          setModalHeader("🎉 Congratulations!");
+          setModalMessage("✨ Your trade was successful! Keep it up! ✨");
+          setModalStyle("bg-success text-white text-center");
+          setShowPopup(true);
+
+          setIsButtonDisabled(false); // Re-enable the button after trade success
+          return 0; // Stop countdown at 0
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown, isButtonDisabled]);
+
   return (
     <div className="container-fluid p-0 bg-dark text-white vh-150 d-flex flex-column">
-      {/* Header */}
-      <div className="text-center py-2 d-flex flex-column align-items-center"
-        style={{ backgroundColor: '#1a1a2e', color: '#e94560', padding: '5px', width: '100%' }}>
-        <h2 className="fw-bold" style={{ fontSize: '1.4rem', marginBottom: '5px' }}>
-          AI Trading Dashboard
-        </h2>
-        <p className="lead" style={{ fontSize: '1rem', marginBottom: '3px' }}>
+      <div
+        className="text-center py-4 d-flex flex-column align-items-center shadow-lg"
+        style={{
+          backgroundColor: '#0D0D0D', // Deep black for professional look
+          color: '#F8F9FA', // Light gray for readability
+          padding: '15px',
+          width: '100%',
+          borderBottom: '3px solid #00FFC6', // Neon cyan border
+          boxShadow: '0 4px 15px rgba(0, 255, 198, 0.2)', // Subtle glow
+        }}
+      >
+        {/* Bitcoin Price */}
+        <p
+          className="fw-semibold m-0 d-flex align-items-center gap-2"
+          style={{
+            fontSize: 'clamp(1rem, 3vw, 1.3rem)', // Responsive font size
+            color: '#F8F9FA',
+          }}
+        >
+          <FaBitcoin className="text-warning" size={20} />
           Real-time Bitcoin Price:
-          <span className="fw-bold" style={{ color: '#FFA500', marginLeft: '5px' }}>
-            {price ? `$${price}` : 'Loading...'}
+          <span
+            className="fw-bold"
+            style={{
+              color: '#FFD700', // Gold for premium effect
+              fontSize: 'clamp(1.2rem, 3vw, 1.4rem)',
+              textShadow: '0 0 8px rgba(255, 215, 0, 0.7)', // Glow effect
+            }}
+          >
+            {price ? `$${price} 🚀` : 'Loading... ⏳'}
           </span>
         </p>
-        <p className="lead" style={{ fontSize: '1rem', marginBottom: '3px' }}>
+
+        {/* Balance */}
+        <p
+          className="fw-semibold mt-2 d-flex align-items-center gap-2"
+          style={{
+            fontSize: 'clamp(1rem, 3vw, 1.3rem)', // Responsive font size
+            color: '#F8F9FA',
+          }}
+        >
+          <FaWallet className="text-success" size={20} />
           Balance:
-          <span className="fw-bold" style={{ color: '#28a745', marginLeft: '5px' }}>
-            ₹{balance}
+          <span
+            className="fw-bold"
+            style={{
+              color: '#28A745', // Green for positive balance
+              fontSize: 'clamp(1.2rem, 3vw, 1.4rem)',
+              textShadow: '0 0 8px rgba(40, 167, 69, 0.7)', // Glow effect
+            }}
+          >
+            ₹{balance} 💰
           </span>
         </p>
       </div>
+
 
       {/* TradingView Chart */}
       <div className="tradingview-container flex-grow-1 d-flex justify-content-center align-items-center"
@@ -160,34 +239,59 @@ const Home = () => {
         <div id="tradingview_chart" className="w-100" style={{ height: '100%' }} ref={chartContainerRef}></div>
       </div>
 
-      {/* Start Trade Button */}
-      <div className="text-center bg-dark" style={{ paddingTop: '10px', paddingBottom: '10px' }}
-        onClick={() => isButtonDisabled && btnDisableClick()}>
-        <button className="btn btn-lg btn-success"
+      {/* Start Trade Button - Fully Centered */}
+      <div className="d-flex justify-content-center align-items-center bg-dark py-3"
+        style={{ minHeight: '15vh' }} // Ensures proper spacing & centering
+        onClick={() => isButtonDisabled && btnDisableClick()}
+      >
+        <button className="btn btn-lg fw-bold d-flex align-items-center justify-content-center"
           onClick={(e) => {
             e.stopPropagation(); // Prevent div click when button is enabled
             if (!isButtonDisabled) handleStartTrade();
           }}
-          disabled={isButtonDisabled}>
-          {countdown > 0 ? `Starting in ${countdown}s` : 'Start Trade'}
+          disabled={isButtonDisabled}
+          style={{
+            width: '250px',
+            fontSize: '1.2rem',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            backgroundColor: isButtonDisabled ? '#4E4E4E' : '#00C853', // Gray when disabled, Green when active
+            color: isButtonDisabled ? '#AAA' : '#FFF',
+            cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+            transition: 'all 0.3s ease-in-out',
+            boxShadow: isButtonDisabled ? 'none' : '0 0 15px rgba(0, 200, 83, 0.5)',
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
+          }}
+          onMouseOver={(e) => {
+            if (!isButtonDisabled) e.currentTarget.style.backgroundColor = '#00E676';
+          }}
+          onMouseOut={(e) => {
+            if (!isButtonDisabled) e.currentTarget.style.backgroundColor = '#00C853';
+          }}
+        >
+          {countdown > 0 ? `Starting in ${countdown}s` : '🚀 Start Trade'}
         </button>
       </div>
 
+
+
       {/* Popup Modal */}
       <Modal show={showPopup} onHide={() => setShowPopup(false)} centered backdrop="static">
-        <Modal.Header closeButton className="bg-dark text-white">
-          <Modal.Title>⚠️ Trade Not Allowed</Modal.Title>
+        <Modal.Header closeButton className={modalStyle}>
+          <Modal.Title>{modalHeader}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="bg-dark text-white text-center">
+        <Modal.Body className={modalStyle}>
           <p className="fw-bold" style={{ fontSize: "1.1rem" }}>
-            Today's trade is already done or balance is too low.
+            {modalMessage}
           </p>
-          <p>Please check and try again later.</p>
         </Modal.Body>
-        <Modal.Footer className="bg-dark">
+        <Modal.Footer className={modalStyle}>
           <Button variant="danger" onClick={() => setShowPopup(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
 import { useAuth } from './authContext'; // Import the auth context
 
 const Login = () => {
@@ -43,14 +44,27 @@ const Login = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="card p-4 shadow-sm bg-secondary text-white" style={{ width: '400px', borderRadius: '10px' }}>
-        <h2 className="text-center mb-4">Login</h2>
-        
-        {errorMessage && <div className="alert alert-danger mt-3">{errorMessage}</div>} {/* Error message */}
-        
+    <div className="d-flex justify-content-center align-items-center vh-100">
+      <div
+        className="card p-4 shadow-lg text-white"
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+          borderRadius: "12px",
+          backgroundColor: "#1a1a2e",
+          boxShadow: "0px 4px 10px rgba(255, 255, 255, 0.1)",
+        }}
+      >
+        <h2 className="text-center mb-3" style={{ color: "#FFA500" }}>
+          🔐 Login
+        </h2>
+
+        {errorMessage && <div className="alert alert-danger mt-3">{errorMessage}</div>}
+
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email address</label>
+          <label htmlFor="email" className="form-label fw-bold">
+            <FaEnvelope className="me-2 text-warning" /> Email Address
+          </label>
           <input
             type="email"
             className="form-control"
@@ -62,7 +76,9 @@ const Login = () => {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password</label>
+          <label htmlFor="password" className="form-label fw-bold">
+            <FaLock className="me-2 text-primary" /> Password
+          </label>
           <input
             type="password"
             className="form-control"
@@ -73,7 +89,9 @@ const Login = () => {
           />
         </div>
 
-        <button className="btn btn-primary w-100" onClick={handleLogin}>Login</button>
+        <button className="btn btn-success w-100 fw-bold" onClick={handleLogin}>
+          <FaSignInAlt className="me-2" /> Login
+        </button>
       </div>
     </div>
   );
