@@ -3,9 +3,17 @@ import { FaUserFriends, FaGift, FaWallet } from 'react-icons/fa';
 
 const Referral = () => {
   return (
-    <div className="container text-center py-4">
+    <div className="container my-5 p-4 text-white text-center" 
+    style={{
+      backgroundColor: '#121212', 
+      borderRadius: '15px', 
+      boxShadow: '0 4px 10px rgba(255, 255, 255, 0.1)',
+      maxWidth: '800px' 
+    }}
+  >
       {/* Referral Card */}
-      <div className="card p-4 shadow-lg bg-dark text-white border-0 rounded-4">
+      <div className="card p-4 shadow-lg text-white border-0 rounded-4"style={{
+      backgroundColor: '#121212'}} >
         <div className="d-flex justify-content-center align-items-center mb-3">
           <FaGift size={50} className="text-warning me-2" /> 
           <h2 className="fw-bold text-uppercase" style={{ letterSpacing: '1px' }}>Referral Bonuses</h2>
