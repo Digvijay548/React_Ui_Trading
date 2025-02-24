@@ -23,6 +23,49 @@ const Balance = () => {
   const navigate = useNavigate();
   const { isLoggedIn, LoggedInEmailId } = useAuth();
 
+
+  // Withdrawal Fields
+  const [tab, setTab] = useState('add');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [holderName, setHolderName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [ifscCode, setIfscCode] = useState('');
+  const [isAccountAdded, setIsAccountAdded] = useState(false);
+
+  const handleAddAccount = async() => {
+    if (!LoggedInEmailId) {
+      console.error("❌ Error: LoggedInEmailId is missing!");
+      navigate('/login');
+      return;
+    }
+    if (holderName && accountNumber && ifscCode) {
+      setIsAccountAdded(true);
+      try {     
+        const Email = localStorage.getItem('LoggedInEmailId');
+      const response = await axios.post(
+        "https://v0-new-project-rl3sqbf45cs.vercel.app/api/Add-Account",
+        {
+          email: Email,
+          accountnumber: accountNumber,
+          accountholdername:holderName,
+          ifsccode:ifscCode
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      setShowPopup(true);
+      setPopupMessage('Error');
+    }
+
+
+    } else {
+      setShowPopup(true);
+      setPopupMessage('Error: Plese Enter All Details');
+    }
+  };
+
   // ✅ Fetch balance from Appwrite on component load
   useEffect(() => {
     if (isLoggedIn) {
@@ -32,13 +75,21 @@ const Balance = () => {
 
   const fetchBalance = async () => {
     try {
-      const email=localStorage.getItem('LoggedInEmailId');
+      const email = localStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
       console.log("fetch balance= ");
       console.log(response.data);
       if (response.data && response.data.balance !== undefined) {
         setBalance(response.data.balance);
       }
+    } catch (error) {
+      console.error("❌ Error fetching balance:", error);
+    }
+  };
+
+  const handleWithdrawMoney = async () => {
+    try {
+      console.log("Withdrawal")
     } catch (error) {
       console.error("❌ Error fetching balance:", error);
     }
@@ -94,9 +145,9 @@ const Balance = () => {
       console.error("❌ Error: LoggedInEmailId is missing!");
       return;
     }
-  
+
     try {
-     const Email=localStorage.getItem('LoggedInEmailId');
+      const Email = localStorage.getItem('LoggedInEmailId');
       const response = await axios.post(
         "https://v0-new-project-rl3sqbf45cs.vercel.app/api/update-balance",
         {
@@ -104,9 +155,9 @@ const Balance = () => {
           amount: parseFloat(amount),
         }
       );
-  
+
       console.log("✅ Balance updated in database:", response.data);
-     // verifyPayment();
+      // verifyPayment();
       return response.data; // Optional: return response data for further use
     } catch (error) {
       console.error(
@@ -115,7 +166,7 @@ const Balance = () => {
       );
     }
   };
-  
+
 
   const handleAddBalance = async () => {
     if (!isLoggedIn) {
@@ -132,9 +183,9 @@ const Balance = () => {
       setPopupType('error');
       return;
     }
-
+    const Email = localStorage.getItem('LoggedInEmailId');
     let res = await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment", {
-      params: { amount: enteredAmount, email: LoggedInEmailId },
+      params: { amount: enteredAmount, email: Email },
     });
 
     if (res.data && res.data.payment_session_id) {
@@ -146,9 +197,32 @@ const Balance = () => {
         redirectTarget: "_modal",
       };
 
-      Cashfree.checkout(checkOptions).then(() => {
-        console.log("Payment Initialized");
-       // setTimeout(verifyPayment, 5000); // Auto verify after 5 sec
+      Cashfree.checkout(checkOptions).then(async (result) => {
+        if (result.error) {
+          // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
+          console.log("User has closed the popup or there is some payment error, Check for Payment Status");
+          console.log(result.error);
+          setShowPopup(true);
+          setPopupMessage("❌ Error verifying payment. Please contact support.");
+          setPopupType("error");
+        }
+        if (result.redirect) {
+          // This will be true when the payment redirection page couldnt be opened in the same window
+          // This is an exceptional case only when the page is opened inside an inAppBrowser
+          // In this case the customer will be redirected to return url once payment is completed
+          console.log("Payment will be redirected");
+        }
+        if (result.paymentDetails) {
+          // This will be called whenever the payment is completed irrespective of transaction status
+          console.log("Payment has been completed, Check for Payment Status");
+          console.log(result.paymentDetails.paymentMessage);
+          await updateBalanceInDatabase(amount);
+          fetchBalance(); // ✅ Refresh balance after update
+          setShowPopup(true);
+          setPopupMessage("✅ Payment Verified Successfully! Your balance is updated.");
+          setPopupType("success");
+          setPaymentPending(false);
+        }
       });
 
       setPaymentPending(true);
@@ -167,34 +241,70 @@ const Balance = () => {
 
   return (
     <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100 bg-dark text-white">
-      <div className="card bg-secondary text-white p-5 w-50" 
-        style={{ borderRadius: '15px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)' }}>
-        
+      <div className="card bg-secondary text-white p-4 w-100"
+        style={{ maxWidth: '500px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)' }}>
+
         <h2 className="text-center mb-3">Balance</h2>
         <h3 className="text-center mb-4">Current Balance: <span className="text-success">₹{balance.toFixed(2)}</span></h3>
 
-        {/* Input Field & Button */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Enter Amount</label>
-          <div className="input-group">
-            <input
-              type="text"
-              value={amount}
-              onChange={(e) => /^\d*$/.test(e.target.value) && setAmount(e.target.value)}
-              placeholder="Enter Amount (Min ₹600)"
-              className="form-control bg-dark text-white border-light"
-            />
-            <button onClick={handleAddBalance} className="btn btn-primary px-4">Add Balance</button>
-          </div>
-          <small className="text-warning mt-2 d-block">Minimum ₹600 required</small>
+        {/* Tabs */}
+        <div className="d-flex justify-content-center mb-4 flex-wrap">
+          <button className={`btn ${tab === 'add' ? 'btn-primary' : 'btn-outline-light'} mx-2 mb-2`} onClick={() => setTab('add')}>Add Balance</button>
+          <button className={`btn ${tab === 'withdraw' ? 'btn-danger' : 'btn-outline-light'} mx-2 mb-2`} onClick={() => setTab('withdraw')}>Withdraw Money</button>
         </div>
 
-        {/* Verify Payment Button (Only if Payment Pending) */}
-        {paymentPending && (
-          <button className="btn btn-warning w-100 my-2" onClick={verifyPayment}>
-            Verify Payment
-          </button>
+        {tab === 'add' && (
+          <div className="text-center">
+            <label className="form-label fw-bold">Enter Amount</label>
+            <div className="d-flex flex-column flex-md-row justify-content-center align-items-center">
+              <input
+                type="text"
+                value={amount}
+                onChange={(e) => /^\d*$/.test(e.target.value) && setAmount(e.target.value)}
+                placeholder="Enter Amount (Min ₹600)"
+                className="form-control bg-dark text-white border-light text-center"
+                style={{ maxWidth: "300px", marginRight: "10px", flex: "1" }}
+              />
+              <button onClick={handleAddBalance} className="btn btn-primary px-4 mt-2 mt-md-0">
+                Add Balance
+              </button>
+            </div>
+
+            <small className="text-warning mt-2 d-block">Minimum ₹600 required</small>
+          </div>
         )}
+
+        {tab === 'withdraw' && (
+          <div className="text-center">
+            {/* Check if account is already added */}
+            {!isAccountAdded ? (
+              <>
+                <h5 className="mb-3">Add Bank Account</h5>
+                <label className="form-label fw-bold">Account Holder Name</label>
+                <input type="text" className="form-control bg-dark text-white border-light mb-2" value={holderName} onChange={(e) => setHolderName(e.target.value)} placeholder="Enter Name" />
+
+                <label className="form-label fw-bold">Account Number</label>
+                <input type="text" className="form-control bg-dark text-white border-light mb-2" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="Enter Account Number" />
+
+                <label className="form-label fw-bold">IFSC Code</label>
+                <input type="text" className="form-control bg-dark text-white border-light mb-2" value={ifscCode} onChange={(e) => setIfscCode(e.target.value)} placeholder="Enter IFSC Code" />
+
+                <button className="btn btn-success w-100 mb-3" onClick={handleAddAccount}>Save Account</button>
+              </>
+            ) : (
+              <>
+                <h5 className="mb-3">Withdraw Money</h5>
+                <p className="text-warning">Account: <strong>{holderName}</strong> - {accountNumber}</p>
+
+                <label className="form-label fw-bold">Enter Withdrawal Amount</label>
+                <input type="text" className="form-control bg-dark text-white border-light mb-2" value={withdrawAmount} onChange={(e) => /^\d*$/.test(e.target.value) && setWithdrawAmount(e.target.value)} placeholder="Min ₹300" />
+
+                <button onClick={handleWithdrawMoney} className="btn btn-danger w-100">Withdraw Money</button>
+              </>
+            )}
+          </div>
+        )}
+
 
         {/* Popup Alert */}
         {showPopup && (

@@ -5,9 +5,8 @@ import '../App.css'; // Optional: import styles
 const TermsAndConditions = () => {
   return (
     <div
-      className="container mt-5 d-flex justify-content-center align-items-center"
+      className="container mt-5 d-flex justify-content-center bg-secondary align-items-center"
       style={{
-        backgroundColor: 'rgba(223, 188, 247, 0.57)',
         borderRadius: '20px',
         minHeight: '70vh', // Ensure container takes at least 70% of viewport height
       }}

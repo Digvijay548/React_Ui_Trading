@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const About = () => {
   return (
-    <div className="container mt-5 p-4 text-white" style={{ backgroundColor: '#111517', borderRadius: '20px' }}>
+    <div className="container mt-5 p-4 bg-secondary text-white" style={{ backgroundColor: '#111517', borderRadius: '20px' }}>
       <h2 className="text-center mb-4 pt-4">About Us</h2>
       <p className="text-center pb-4">
         Welcome to AI Trading, the platform where you can trade cryptocurrencies with cutting-edge AI technology. 

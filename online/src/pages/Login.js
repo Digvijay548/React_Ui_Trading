@@ -44,7 +44,7 @@ const Login = () => {
 
   return (
     <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="card p-4 shadow-sm" style={{ width: '400px', backgroundColor: 'rgba(223, 188, 247, 0.57)', borderRadius: '10px' }}>
+      <div className="card p-4 shadow-sm bg-secondary text-white" style={{ width: '400px', borderRadius: '10px' }}>
         <h2 className="text-center mb-4">Login</h2>
         
         {errorMessage && <div className="alert alert-danger mt-3">{errorMessage}</div>} {/* Error message */}
