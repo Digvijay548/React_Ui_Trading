@@ -106,6 +106,7 @@ const Balance = () => {
       );
   
       console.log("✅ Balance updated in database:", response.data);
+     // verifyPayment();
       return response.data; // Optional: return response data for further use
     } catch (error) {
       console.error(
@@ -147,7 +148,7 @@ const Balance = () => {
 
       Cashfree.checkout(checkOptions).then(() => {
         console.log("Payment Initialized");
-        setTimeout(verifyPayment, 5000); // Auto verify after 5 sec
+       // setTimeout(verifyPayment, 5000); // Auto verify after 5 sec
       });
 
       setPaymentPending(true);
