@@ -18,6 +18,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [modalMessage, setModalMessage] = useState("");
   const [modalHeader, setModalHeader] = useState("");
+  const [IsTradeDone,setisTradeDone]=useState(true);
 
   const [modalStyle, setModalStyle] = useState(""); // For dynamic styles
 
@@ -27,6 +28,8 @@ if(!isLoggedIn)
   navigate("/login");
 }
   },[isLoggedIn])
+
+
 
   // Fetch user balance
   const fetchBalance = async () => {
@@ -47,13 +50,15 @@ if(!isLoggedIn)
         console.log(`🔍 Last Trade Date: ${lastTradeDate}, Today's Date: ${todayDate}`);
 
         if (lastTradeDate === todayDate) {
-
+          setisTradeDone(true);
           setIsButtonDisabled(true);
         } else {
+          setisTradeDone(false);
           setIsButtonDisabled(false);
         }
       } else {
         setIsButtonDisabled(response.data.balance <= 0);
+        setisTradeDone(false);
       }
 
       if (response.data && response.data.balance !== undefined) {
@@ -67,7 +72,7 @@ if(!isLoggedIn)
   // Fetch balance on mount
   useEffect(() => {
     fetchBalance();
-  }, []);
+  }, [IsTradeDone]);
 
   // Fetch Bitcoin price every 500ms
   useEffect(() => {
@@ -145,6 +150,7 @@ if(!isLoggedIn)
 
       console.log("✅ Trade started successfully:", response.data);
     } catch (error) {
+      isButtonDisabled(true);
       console.error("❌ Error starting trade:", error.response?.data || error.message);
     }
   };
@@ -164,7 +170,7 @@ if(!isLoggedIn)
           setModalStyle("bg-success text-white text-center");
           setShowPopup(true);
 
-          setIsButtonDisabled(false); // Re-enable the button after trade success
+          setIsButtonDisabled(true); // Re-enable the button after trade success
           return 0; // Stop countdown at 0
         }
         return prev - 1;
