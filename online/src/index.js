@@ -44,12 +44,12 @@ const App = () => {
     ) : (
       <>
         <li className="nav-item">
-          <Link to="/login" className="btn login-btn" onClick={closeNav}>
+          <Link to="/login" className="btn login-btn text-white" onClick={closeNav}>
             <FaSignInAlt size={20} /> Login
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/register" className="btn register-btn" onClick={closeNav}>
+          <Link to="/register" className="btn register-btn text-white" onClick={closeNav}>
             Register
           </Link>
         </li>
