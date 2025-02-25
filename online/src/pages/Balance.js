@@ -98,6 +98,12 @@ const Balance = () => {
   const handleWithdrawMoney = async () => {
     try {
       console.log("Withdrawal done")
+      const email = localStorage.getItem('LoggedInEmailId');
+      const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-Withdrawal`, {
+        params: { email, amount } // Passing email & amount as query params
+      });
+console.log("Withdrawal = ")
+     console.log(response.data)
     } catch (error) {
       console.error("❌ Error fetching balance:", error);
     }
