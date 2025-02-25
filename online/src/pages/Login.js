@@ -14,7 +14,7 @@ const Login = () => {
 
   // Check if the user is already logged in when the component mounts
   useEffect(() => {
-    const sessionId = localStorage.getItem('sessionId');
+    const sessionId = sessionStorage.getItem('sessionId');
     if (sessionId) {
       navigate('/home'); // Redirect user to home if they are already logged in
     }
@@ -31,7 +31,7 @@ const Login = () => {
 
       // If login is successful, store session data (if required)
       const sessionId = response.data.sessionId;
-      localStorage.setItem('sessionId', sessionId); // Store sessionId in localStorage
+      sessionStorage.setItem('sessionId', sessionId); // Store sessionId in sessionStorage
       login(sessionId); // Use context's login function to update the state
       LoggedInEmailId(email);
       setErrorMessage(''); // Clear error message if login is successful

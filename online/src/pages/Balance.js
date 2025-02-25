@@ -49,7 +49,7 @@ const Balance = () => {
     if (holderName && accountNumber && ifscCode) {
       setIsAccountAdded(true);
       try {
-        const Email = localStorage.getItem('LoggedInEmailId');
+        const Email = sessionStorage.getItem('LoggedInEmailId');
         const response = await axios.post(
           "https://v0-new-project-rl3sqbf45cs.vercel.app/api/Add-Account",
           {
@@ -84,7 +84,7 @@ const Balance = () => {
 
   const fetchBalance = async () => {
     try {
-      const email = localStorage.getItem('LoggedInEmailId');
+      const email = sessionStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-balance?email=${email}`);
       
       if (response.data && response.data.balance !== undefined) {
@@ -98,12 +98,29 @@ const Balance = () => {
   const handleWithdrawMoney = async () => {
     try {
       console.log("Withdrawal done")
-      const email = localStorage.getItem('LoggedInEmailId');
-      const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-Withdrawal`, {
-        params: { email, amount } // Passing email & amount as query params
-      });
+      const Email = sessionStorage.getItem('LoggedInEmailId');
+      const response = await axios.post(
+        "https://v0-new-project-rl3sqbf45cs.vercel.app/api/getWithdrawal",
+        {
+          email:Email,
+          amount:withdrawAmount
+        }
+      );
 console.log("Withdrawal = ")
      console.log(response.data)
+     if(response.data.error)
+     {
+      setPopupType("error");
+      setShowPopup(true);
+      setPopupMessage(response.data.error);
+
+     }
+     if(response.data.message)
+     {
+      setPopupType("success");
+      setShowPopup(true);
+      setPopupMessage(response.data.message);
+     }
     } catch (error) {
       console.error("❌ Error fetching balance:", error);
     }
@@ -112,7 +129,7 @@ console.log("Withdrawal = ")
   const GetAccountDetails = async () => {
 
     try {
-      const email = localStorage.getItem('LoggedInEmailId');
+      const email = sessionStorage.getItem('LoggedInEmailId');
       const response = await axios.get(`https://v0-new-project-rl3sqbf45cs.vercel.app/api/get-AccountDetails?email=${email}`)
       
       if (
@@ -178,7 +195,7 @@ console.log("Withdrawal = ")
     }
 
     try {
-      const Email = localStorage.getItem('LoggedInEmailId');
+      const Email = sessionStorage.getItem('LoggedInEmailId');
       const response = await axios.post(
         "https://v0-new-project-rl3sqbf45cs.vercel.app/api/update-balance",
         {
@@ -212,7 +229,7 @@ console.log("Withdrawal = ")
       setPopupType('error');
       return;
     }
-    const Email = localStorage.getItem('LoggedInEmailId');
+    const Email = sessionStorage.getItem('LoggedInEmailId');
     let res = await axios.get("https://v0-new-project-rl3sqbf45cs.vercel.app/api/create-payment", {
       params: { amount: enteredAmount, email: Email },
     });
@@ -230,8 +247,8 @@ console.log("Withdrawal = ")
           // This will be true whenever user clicks on close icon inside the modal or any error happens during the payment
           console.log("User has closed the popup or there is some payment error, Check for Payment Status");
           setShowPopup(true);
-          setPopupMessage("❌ Error verifying payment. Please contact support.");
           setPopupType("error");
+          setPopupMessage("❌ Error verifying payment. Please contact support.");          
         }
         if (result.paymentDetails) {
           // This will be called whenever the payment is completed irrespective of transaction status
@@ -246,8 +263,9 @@ console.log("Withdrawal = ")
 
       setPaymentPending(true);
       setShowPopup(true);
+       setPopupType('info');
       setPopupMessage(`Please complete the payment of ₹${enteredAmount}.`);
-      setPopupType('info');
+     
     }
   };
 

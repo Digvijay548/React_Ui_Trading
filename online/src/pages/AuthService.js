@@ -1,13 +1,13 @@
 // AuthService.js
 const AuthService = {
   login: (sessionId) => {
-    localStorage.setItem('sessionId', sessionId); // Store sessionId in localStorage
+    sessionStorage.setItem('sessionId', sessionId); // Store sessionId in sessionStorage
   },
   logout: () => {
-    localStorage.removeItem('sessionId'); // Remove sessionId from localStorage
+    sessionStorage.removeItem('sessionId'); // Remove sessionId from sessionStorage
   },
   isLoggedIn: () => {
-    return localStorage.getItem('sessionId') !== null; // Check if sessionId exists
+    return sessionStorage.getItem('sessionId') !== null; // Check if sessionId exists
   },
 };
 

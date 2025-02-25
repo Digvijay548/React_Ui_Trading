@@ -7,29 +7,29 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check localStorage on app load to see if the user is logged in
+  // Check sessionStorage on app load to see if the user is logged in
   useEffect(() => {
-    const sessionId = localStorage.getItem('sessionId');
+    const sessionId = sessionStorage.getItem('sessionId');
     if (sessionId) {
       setIsLoggedIn(true); // If session exists, set user as logged in
     }
   }, []);
 
-  // Login function that sets the sessionId in localStorage and updates the state
+  // Login function that sets the sessionId in sessionStorage and updates the state
   const login = (sessionId) => {
-    localStorage.setItem('sessionId', sessionId);
+    sessionStorage.setItem('sessionId', sessionId);
     setIsLoggedIn(true);
   };
 
-  // Logout function that removes sessionId from localStorage and updates the state
+  // Logout function that removes sessionId from sessionStorage and updates the state
   const logout = () => {
-    localStorage.removeItem('sessionId');
-    localStorage.removeItem('LoggedInEmailId');
+    sessionStorage.removeItem('sessionId');
+    sessionStorage.removeItem('LoggedInEmailId');
     setIsLoggedIn(false);
   };
 
   const LoggedInEmailId = (loggedInEmailId) => {
-    localStorage.setItem('LoggedInEmailId',loggedInEmailId);
+    sessionStorage.setItem('LoggedInEmailId',loggedInEmailId);
     
   };
   

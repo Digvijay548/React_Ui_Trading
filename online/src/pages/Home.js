@@ -34,7 +34,7 @@ if(!isLoggedIn)
   // Fetch user balance
   const fetchBalance = async () => {
     try {
-      const email = localStorage.getItem("LoggedInEmailId");
+      const email = sessionStorage.getItem("LoggedInEmailId");
       if (!email) return;
 
       const response = await axios.get(
@@ -140,7 +140,7 @@ if(!isLoggedIn)
     setCountdown(60);
 
     try {
-      const email = localStorage.getItem("LoggedInEmailId");
+      const email = sessionStorage.getItem("LoggedInEmailId");
       if (!email) return;
 
       const response = await axios.post(
