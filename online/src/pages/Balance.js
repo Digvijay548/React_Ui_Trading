@@ -200,7 +200,7 @@ const Balance = () => {
     }
 
     const enteredAmount = Number(amount);
-    if (enteredAmount < 1 || isNaN(enteredAmount)) {
+    if (enteredAmount < 600 || isNaN(enteredAmount)) {
       setShowPopup(true);
       setPopupMessage('Error: Minimum amount is ₹600 and only numbers are allowed.');
       setPopupType('error');
