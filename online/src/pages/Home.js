@@ -169,6 +169,7 @@ if(!isLoggedIn)
           setModalMessage("✨ Your trade was successful! Keep it up! ✨");
           setModalStyle("bg-success text-white text-center");
           setShowPopup(true);
+          setisTradeDone(true);
 
           setIsButtonDisabled(true); // Re-enable the button after trade success
           return 0; // Stop countdown at 0

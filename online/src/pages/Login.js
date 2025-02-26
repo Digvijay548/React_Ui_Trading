@@ -42,6 +42,26 @@ const Login = () => {
       console.error('Login error:', error);
     }
   };
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setErrorMessage("Please enter your email to reset password.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/forgot-password", { email });
+  
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data.message);
+      } else {
+        setErrorMessage(data.error);
+      }
+    } catch (error) {
+      setErrorMessage("Failed to send reset link.");
+    }
+  };
+  
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100">
@@ -92,6 +112,12 @@ const Login = () => {
         <button className="btn btn-success w-100 fw-bold" onClick={handleLogin}>
           <FaSignInAlt className="me-2" /> Login
         </button>
+
+        <div className="text-center mt-3">
+          <button className="btn btn-link text-warning" onClick={handleForgotPassword}>
+            Forgot Password?
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,93 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import { account } from '../appwrite'; // Import Appwrite client
-import { useLocation, useNavigate } from 'react-router-dom'; // useLocation to get URL params and useNavigate for redirection
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { FaLock } from "react-icons/fa";
 
 const ResetPassword = () => {
-  const [newPassword, setNewPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation(); // Use useLocation to access the URL params
 
-  // Extract query parameters from the URL
-  const queryParams = new URLSearchParams(location.search);
-  const userId = queryParams.get('userId');
-  const secret = queryParams.get('secret');
-  const expire = queryParams.get('expire');
+  const userId = searchParams.get("userId");
+  const secret = searchParams.get("secret");
 
-  // Make sure token (secret) exists
   useEffect(() => {
-    if (!secret || !userId) {
-      setErrorMessage('Invalid link or missing token.');
+    if (!userId || !secret) {
+      setError("Invalid or expired reset link.");
     }
-  }, [secret, userId]);
+  }, [userId, secret]);
 
-  const handleResetPassword = async () => {
-    console.log(newPassword)
-    if (!newPassword) {
-      setErrorMessage('Please enter a new password.');
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+
+    if (!password || !confirmPassword) {
+      setError("Please fill all fields.");
       return;
     }
 
-    setLoading(true);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     try {
-      // Reset the password with the secret and new password
-      const response = await account.updateRecovery(userId,secret, newPassword); 
-      account.deleteSessions(account)// Reset password via Appwrite
-      console.log('Password reset response:', response);
-      setSuccessMessage('Password successfully reset. You can now log in.');
-      
-      // Redirect to the login page after successful password reset
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000); // Redirect after 3 seconds
-    } catch (error) {
-      console.error('Password reset error:', error);
-      setErrorMessage(error.message || 'Failed to reset password.');
-    } finally {
-      setLoading(false);
+      const response = await fetch("http://localhost:5000/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, secret, password, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("✅ Password reset successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 3000);
+      } else {
+        setError(data.error);
+      }
+    } catch (err) {
+      setError("❌ Failed to reset password.");
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="card p-4 shadow-sm" style={{ width: '400px' }}>
-        <h2 className="text-center mb-4">Reset Password</h2>
+    <div className="container-fluid d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#1a1a2e" }}>
+      <div
+        className="card p-4 shadow-lg text-white reset-card"
+        style={{
+          borderRadius: "12px",
+          backgroundColor: "#16213e",
+          boxShadow: "0px 4px 10px rgba(255, 255, 255, 0.1)",
+        }}
+      >
+        <h2 className="text-center mb-3" style={{ color: "#FFA500" }}>
+          🔒 Reset Password
+        </h2>
 
-        {/* Error Message */}
-        {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+        {error && <div className="alert alert-danger">{error}</div>}
+        {message && <div className="alert alert-success">{message}</div>}
 
-        {/* Success Message */}
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
+        <form onSubmit={handleResetPassword}>
+          <div className="mb-3">
+            <label className="form-label fw-bold">
+              <FaLock className="me-2 text-warning" /> New Password
+            </label>
+            <input
+              type="password"
+              className="form-control bg-dark text-white border-0"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        {/* New Password Field */}
-        <div className="mb-3">
-          <label htmlFor="newPassword" className="form-label">New Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="newPassword"
-            placeholder="Enter your new password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-        </div>
+          <div className="mb-3">
+            <label className="form-label fw-bold">
+              <FaLock className="me-2 text-warning" /> Confirm Password
+            </label>
+            <input
+              type="password"
+              className="form-control bg-dark text-white border-0"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
 
-        {/* Submit Button */}
-        <button
-          className="btn btn-primary w-100"
-          onClick={handleResetPassword}
-          disabled={loading} // Disable button while loading
-        >
-          {loading ? 'Resetting...' : 'Reset Password'}
-        </button>
-
-        {/* Link to Login page */}
-        <p className="mt-3 text-center">
-          Remember your password? <a href="/login">Login</a>
-        </p>
+          <button className="btn btn-success w-100 fw-bold" type="submit">
+            🔄 Reset Password
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ const Referral = () => {
 
         <p className="lead fw-medium">
           <FaUserFriends className="text-success me-2" size={22} />
-          Refer a friend and earn <span className="text-warning fw-bold">₹500</span> on their first trade!
+          Refer a friend and earn <span className="text-warning fw-bold">₹150</span> on their first trade!
         </p>
 
         <button className="btn btn-lg btn-outline-warning mt-3 fw-bold px-4 py-2 rounded-3"
@@ -53,7 +53,7 @@ const Referral = () => {
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <div className="modal-body text-center">
-                <p>✅ Share this referral link with your friend and earn ₹500!</p>
+                <p>✅ Share this referral link with your friend and earn ₹150!</p>
                 <div className="p-2 bg-dark text-warning rounded-3">
                   <strong>{referralLink}</strong>
                 </div>
