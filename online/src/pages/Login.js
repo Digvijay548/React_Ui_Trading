@@ -44,23 +44,25 @@ const Login = () => {
   };
   const handleForgotPassword = async () => {
     if (!email) {
-      setErrorMessage("Please enter your email to reset password.");
+      setErrorMessage("Please enter your email to reset the password.");
       return;
     }
   
     try {
       const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/forgot-password", { email });
   
-      const data = await response.json();
-      if (response.ok) {
-        console.log(data.message);
-      } else {
-        setErrorMessage(data.error);
-      }
+      // ✅ Axios already parses JSON, so directly access response.data
+      console.log(response.data.message);
+      setErrorMessage("Password reset link has been sent to your email.");
     } catch (error) {
-      setErrorMessage("Failed to send reset link.");
+      if (error.response) {
+        setErrorMessage(error.response.data.error || "Failed to send reset link.");
+      } else {
+        setErrorMessage("Failed to connect to the server.");
+      }
     }
   };
+  
   
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
+import axios from 'axios';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -22,36 +23,33 @@ const ResetPassword = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-
+  
     if (!password || !confirmPassword) {
       setError("Please fill all fields.");
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
+  
     try {
-      const response = await fetch("http://localhost:5000/api/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, secret, password, confirmPassword }),
+      const response = await axios.post("https://v0-new-project-rl3sqbf45cs.vercel.app/api/reset-password", {
+        userId, secret, password, confirmPassword
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+  
+      if (response.data.error) {
+        setError(response.data.error); // Directly set the error message from API
+      } else {
         setMessage("✅ Password reset successful! Redirecting to login...");
         setTimeout(() => navigate("/login"), 3000);
-      } else {
-        setError(data.error);
       }
     } catch (err) {
-      setError("❌ Failed to reset password.");
+      setError("❌ Failed to reset password. Please try again.");
     }
   };
+  
 
   return (
     <div className="container-fluid d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#1a1a2e" }}>
