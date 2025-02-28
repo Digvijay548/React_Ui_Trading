@@ -14,8 +14,9 @@ import { AuthProvider, useAuth } from "./pages/authContext";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState,useEffect  } from "react";
-import { FaRobot, FaChartLine, FaSignOutAlt, FaSignInAlt, FaGift, FaWallet, FaEnvelope, FaFileContract, FaEllipsisV } from "react-icons/fa";
+import { FaRobot, FaChartLine,FaTelegramPlane, FaSignOutAlt, FaSignInAlt, FaGift, FaWallet, FaEnvelope, FaFileContract, FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
+import JoinUs from "./pages/JoinUs";
 
 const App = () => { 
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -91,6 +92,7 @@ const App = () => {
                     <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="moreDropdown">
                       <li><Link to="/referral" className="dropdown-item" onClick={closeNav}><FaGift /> Referral</Link></li>
                       <li><Link to="/contactus" className="dropdown-item" onClick={closeNav}><FaEnvelope /> Contact Us</Link></li>
+                      <li><Link to="/JoinUs" className="dropdown-item" onClick={closeNav}><FaTelegramPlane /> Telegram</Link></li>
                       <li><Link to="/termsandconditions" className="dropdown-item" onClick={closeNav}><FaFileContract /> Terms & Conditions</Link></li>
                     </ul>
                   </li>
@@ -111,6 +113,7 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/contactus" element={<ContactUs />} />
               <Route path="/termsandconditions" element={<TermsAndConditions />} />
+              <Route path="/JoinUs" element={<JoinUs />} />
             </Routes>
           </div>
         </div>
