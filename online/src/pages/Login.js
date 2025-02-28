@@ -42,6 +42,9 @@ const Login = () => {
       console.error('Login error:', error);
     }
   };
+  const handleRegister =async()=>{
+    navigate("/register");
+  }
   const handleForgotPassword = async () => {
     if (!email) {
       setErrorMessage("Please enter your email to reset the password.");
@@ -80,9 +83,9 @@ const Login = () => {
         <h2 className="text-center mb-3" style={{ color: "#FFA500" }}>
           🔐 Login
         </h2>
-
+  
         {errorMessage && <div className="alert alert-danger mt-3">{errorMessage}</div>}
-
+  
         <div className="mb-3">
           <label htmlFor="email" className="form-label fw-bold">
             <FaEnvelope className="me-2 text-warning" /> Email Address
@@ -96,7 +99,7 @@ const Login = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-
+  
         <div className="mb-3">
           <label htmlFor="password" className="form-label fw-bold">
             <FaLock className="me-2 text-primary" /> Password
@@ -110,19 +113,27 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
+  
         <button className="btn btn-success w-100 fw-bold" onClick={handleLogin}>
           <FaSignInAlt className="me-2" /> Login
         </button>
-
+  
         <div className="text-center mt-3">
           <button className="btn btn-link text-warning" onClick={handleForgotPassword}>
             Forgot Password?
           </button>
         </div>
+  
+        <div className="text-center mt-3">
+          <span className="text-white">Don't have an account? </span>
+          <button className="btn btn-link text-info" onClick={handleRegister}>
+            Register
+          </button>
+        </div>
       </div>
     </div>
   );
+  
 };
 
 export default Login;

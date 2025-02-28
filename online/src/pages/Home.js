@@ -25,7 +25,7 @@ const Home = () => {
   useEffect(()=>{
 if(!isLoggedIn)
 {
-  navigate("/login");
+  navigate("/register");
 }
   },[isLoggedIn])
 
