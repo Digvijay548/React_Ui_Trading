@@ -79,7 +79,7 @@ const Register = () => {
             </div>
             <div className="mb-3">
               <label htmlFor="referralCode" className="form-label fw-bold">
-                <FaGift className="me-2 text-success" /> Referral Code (Optional)
+                <FaGift className="me-2 text-success" /> Referral Member Email (Optional)
               </label>
               <input
                 type="text"

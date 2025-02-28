@@ -10,6 +10,10 @@ const Referral = () => {
   const handleReferClick = () => {
     setShowModal(true); // Auto-close modal after 3 seconds
   };
+  const handleCopyReferralLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    alert("Referral link copied to clipboard!");
+  };
 
   return (
     <div className="container my-5 p-4 text-white text-center"
@@ -52,7 +56,7 @@ const Referral = () => {
                 <h5 className="modal-title text-warning">📢 Referral Link</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
-              <div className="modal-body text-center">
+              <div className="modal-body text-center" onClick={handleCopyReferralLink}>
                 <p>✅ Share this referral link with your friend and earn ₹150!</p>
                 <div className="p-2 bg-dark text-warning rounded-3">
                   <strong>{referralLink}</strong>
